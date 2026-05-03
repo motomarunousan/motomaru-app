@@ -1,0 +1,1989 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#2e7d32">
+<title>梨農家 売上管理アプリ</title>
+<style>
+  /* ============================================
+     基本スタイル
+     ============================================ */
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+    background: #f5f7f5;
+    color: #222;
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+    overscroll-behavior: none;
+  }
+  body {
+    padding-bottom: 80px; /* タブバー分の余白 */
+  }
+  button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: inherit;
+    font-size: inherit;
+  }
+  input, select {
+    font-family: inherit;
+    font-size: inherit;
+  }
+  h1, h2, h3, h4 {
+    margin: 0;
+  }
+
+  /* ============================================
+     ヘッダー
+     ============================================ */
+  .header {
+    background: linear-gradient(135deg, #2e7d32 0%, #43a047 100%);
+    color: #fff;
+    padding: 14px 16px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .header .subtitle {
+    font-size: 11px;
+    opacity: 0.9;
+    margin-top: 2px;
+  }
+
+  /* ============================================
+     タブバー（下部固定）
+     ============================================ */
+  .tab-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #fff;
+    display: flex;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    z-index: 100;
+    border-top: 1px solid #e0e0e0;
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 10px 4px 12px;
+    font-size: 12px;
+    color: #777;
+    text-align: center;
+    transition: all 0.15s;
+    background: #fff;
+  }
+  .tab-btn .icon {
+    display: block;
+    font-size: 22px;
+    margin-bottom: 2px;
+  }
+  .tab-btn.active {
+    color: #2e7d32;
+    font-weight: 700;
+  }
+  .tab-btn:active {
+    background: #f0f0f0;
+    transform: scale(0.95);
+  }
+
+  /* ============================================
+     メインコンテナ
+     ============================================ */
+  .main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 12px;
+  }
+  .panel {
+    display: none;
+    animation: fadeIn 0.25s;
+  }
+  .panel.active {
+    display: block;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============================================
+     カード
+     ============================================ */
+  .card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #2e7d32;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 2px solid #e8f5e9;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ============================================
+     品種選択ボタン
+     ============================================ */
+  .variety-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 8px;
+  }
+  .variety-btn {
+    padding: 14px 6px;
+    border: 2px solid #c8e6c9;
+    background: #fff;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 15px;
+    color: #2e7d32;
+    transition: all 0.2s;
+    min-height: 50px;
+  }
+  .variety-btn:active {
+    transform: scale(0.95);
+  }
+  .variety-btn.selected {
+    background: linear-gradient(135deg, #43a047, #66bb6a);
+    color: #fff;
+    border-color: #2e7d32;
+    box-shadow: 0 4px 10px rgba(67,160,71,0.4);
+  }
+
+  /* ============================================
+     商品ボタン（カテゴリごと）
+     ============================================ */
+  .category-section {
+    margin-bottom: 12px;
+  }
+  .category-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #555;
+    margin-bottom: 6px;
+    padding-left: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .category-label .badge {
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 8px;
+    background: #e8f5e9;
+    color: #2e7d32;
+    font-weight: 700;
+  }
+  .category-label .badge.use-home {
+    background: #fff3e0;
+    color: #e65100;
+  }
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 8px;
+  }
+  .product-btn {
+    padding: 10px 6px;
+    border: 2px solid #ffe0b2;
+    background: #fff;
+    border-radius: 10px;
+    text-align: center;
+    transition: all 0.2s;
+    min-height: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2px;
+  }
+  .product-btn .size {
+    font-size: 16px;
+    font-weight: 700;
+    color: #e65100;
+  }
+  .product-btn .price {
+    font-size: 12px;
+    color: #555;
+  }
+  .product-btn:active {
+    transform: scale(0.95);
+  }
+  .product-btn.selected {
+    background: linear-gradient(135deg, #fb8c00, #ffa726);
+    border-color: #e65100;
+    box-shadow: 0 4px 10px rgba(251,140,0,0.4);
+  }
+  .product-btn.selected .size,
+  .product-btn.selected .price {
+    color: #fff;
+  }
+
+  /* ============================================
+     個数入力
+     ============================================ */
+  .qty-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+  .qty-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #43a047;
+    color: #fff;
+    font-size: 26px;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    transition: all 0.15s;
+  }
+  .qty-btn:active {
+    transform: scale(0.92);
+    background: #2e7d32;
+  }
+  .qty-input {
+    width: 80px;
+    height: 50px;
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    border: 2px solid #c8e6c9;
+    border-radius: 10px;
+    color: #222;
+  }
+
+  /* ============================================
+     追加ボタン
+     ============================================ */
+  .add-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #f57c00, #ff9800);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(245,124,0,0.35);
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+  .add-btn:active {
+    transform: scale(0.97);
+  }
+  .add-btn:disabled {
+    background: #bdbdbd;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+  /* 追加時アニメーション */
+  @keyframes addPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); background: linear-gradient(135deg, #43a047, #66bb6a); }
+    100% { transform: scale(1); }
+  }
+  .add-btn.flash {
+    animation: addPulse 0.4s;
+  }
+
+  /* ============================================
+     本日の売上表示
+     ============================================ */
+  .today-summary {
+    background: linear-gradient(135deg, #2e7d32 0%, #43a047 100%);
+    color: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 12px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(46,125,50,0.3);
+  }
+  .today-summary .label {
+    font-size: 13px;
+    opacity: 0.9;
+  }
+  .today-summary .total {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin: 4px 0;
+  }
+  .today-summary .yen {
+    font-size: 22px;
+    margin-left: 4px;
+  }
+  .today-summary .count {
+    font-size: 13px;
+    opacity: 0.95;
+    margin-top: 4px;
+  }
+
+  /* ============================================
+     売上一覧
+     ============================================ */
+  .sale-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .sale-item {
+    background: #fafafa;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    border-left: 4px solid #43a047;
+    animation: slideIn 0.25s;
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slideOut {
+    from { opacity: 1; transform: translateX(0); max-height: 100px; }
+    to { opacity: 0; transform: translateX(100px); max-height: 0; padding: 0; margin: 0; }
+  }
+  .sale-item.removing {
+    animation: slideOut 0.3s forwards;
+  }
+  .sale-item .sale-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .sale-item .sale-time {
+    font-size: 11px;
+    color: #888;
+  }
+  .sale-item .sale-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #222;
+    margin: 2px 0;
+  }
+  .sale-item .sale-detail {
+    font-size: 11px;
+    color: #666;
+  }
+  .sale-item .sale-amount {
+    font-weight: 700;
+    color: #2e7d32;
+    font-size: 15px;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .sale-item .sale-qty {
+    font-size: 11px;
+    color: #888;
+  }
+  .sale-del-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #ffebee;
+    color: #c62828;
+    font-size: 18px;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .sale-del-btn:active {
+    background: #c62828;
+    color: #fff;
+    transform: scale(0.9);
+  }
+
+  /* ============================================
+     リセットボタン
+     ============================================ */
+  .reset-btn {
+    width: 100%;
+    padding: 12px;
+    background: #ffebee;
+    color: #c62828;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 10px;
+    border: 2px solid #ffcdd2;
+    transition: all 0.15s;
+    margin-top: 8px;
+  }
+  .reset-btn:active {
+    background: #c62828;
+    color: #fff;
+    transform: scale(0.98);
+  }
+
+  /* ============================================
+     集計タブ（サブタブ）
+     ============================================ */
+  .subtab-bar {
+    display: flex;
+    overflow-x: auto;
+    gap: 6px;
+    padding: 4px 2px;
+    margin-bottom: 12px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .subtab-bar::-webkit-scrollbar {
+    display: none;
+  }
+  .subtab-btn {
+    padding: 8px 14px;
+    background: #fff;
+    color: #555;
+    border: 2px solid #e0e0e0;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .subtab-btn.active {
+    background: #2e7d32;
+    color: #fff;
+    border-color: #2e7d32;
+  }
+  .subtab-btn:active {
+    transform: scale(0.95);
+  }
+
+  /* ============================================
+     集計テーブル
+     ============================================ */
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    background: #fafafa;
+    border-radius: 10px;
+    margin-bottom: 6px;
+    border-left: 4px solid #fb8c00;
+  }
+  .stat-row.rank-1 { border-left-color: #ffd700; }
+  .stat-row.rank-2 { border-left-color: #c0c0c0; }
+  .stat-row.rank-3 { border-left-color: #cd7f32; }
+  .stat-row .stat-label {
+    font-weight: 700;
+    color: #333;
+    font-size: 14px;
+  }
+  .stat-row .stat-rank {
+    display: inline-block;
+    width: 22px;
+    color: #888;
+    font-size: 12px;
+  }
+  .stat-row .stat-value {
+    text-align: right;
+  }
+  .stat-row .stat-amount {
+    font-weight: 700;
+    color: #2e7d32;
+    font-size: 15px;
+  }
+  .stat-row .stat-count {
+    font-size: 11px;
+    color: #888;
+  }
+  .stat-total {
+    background: linear-gradient(135deg, #2e7d32, #43a047);
+    color: #fff;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .stat-total .label {
+    font-size: 13px;
+    opacity: 0.9;
+  }
+  .stat-total .value {
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  /* ============================================
+     設定画面
+     ============================================ */
+  .setting-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .setting-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #fafafa;
+    border-radius: 10px;
+    margin-bottom: 6px;
+  }
+  .setting-item .info {
+    flex: 1;
+    min-width: 0;
+  }
+  .setting-item .name {
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .setting-item .meta {
+    font-size: 11px;
+    color: #777;
+    margin-top: 2px;
+  }
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    font-size: 16px;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .icon-btn.edit-btn {
+    background: #e3f2fd;
+    color: #1565c0;
+  }
+  .icon-btn.del-btn {
+    background: #ffebee;
+    color: #c62828;
+  }
+  .icon-btn:active {
+    transform: scale(0.9);
+  }
+  .add-row-btn {
+    width: 100%;
+    padding: 12px;
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 2px dashed #66bb6a;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 6px;
+    transition: all 0.15s;
+  }
+  .add-row-btn:active {
+    background: #c8e6c9;
+    transform: scale(0.98);
+  }
+  .danger-btn {
+    width: 100%;
+    padding: 12px;
+    background: #fff;
+    color: #c62828;
+    border: 2px solid #ef5350;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 8px;
+    transition: all 0.15s;
+  }
+  .danger-btn:active {
+    background: #c62828;
+    color: #fff;
+  }
+  .info-btn {
+    width: 100%;
+    padding: 12px;
+    background: #e3f2fd;
+    color: #1565c0;
+    border: 2px solid #90caf9;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 8px;
+    transition: all 0.15s;
+  }
+  .info-btn:active {
+    background: #1565c0;
+    color: #fff;
+  }
+
+  /* ============================================
+     モーダル
+     ============================================ */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+    animation: overlayIn 0.2s;
+  }
+  @keyframes overlayIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .modal-overlay.show {
+    display: flex;
+  }
+  .modal {
+    background: #fff;
+    border-radius: 14px;
+    padding: 18px;
+    width: 100%;
+    max-width: 380px;
+    max-height: 88vh;
+    overflow-y: auto;
+    animation: modalIn 0.25s;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .modal h3 {
+    font-size: 16px;
+    margin-bottom: 12px;
+    color: #2e7d32;
+  }
+  .modal .field {
+    margin-bottom: 10px;
+  }
+  .modal .field label {
+    display: block;
+    font-size: 12px;
+    color: #555;
+    margin-bottom: 4px;
+    font-weight: 700;
+  }
+  .modal input, .modal select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 16px;
+    background: #fff;
+  }
+  .modal input:focus, .modal select:focus {
+    outline: none;
+    border-color: #43a047;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .modal-actions button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    transition: all 0.15s;
+  }
+  .modal-actions .cancel {
+    background: #f5f5f5;
+    color: #555;
+  }
+  .modal-actions .ok {
+    background: linear-gradient(135deg, #43a047, #66bb6a);
+    color: #fff;
+  }
+  .modal-actions .danger {
+    background: linear-gradient(135deg, #e53935, #ef5350);
+    color: #fff;
+  }
+  .modal-actions button:active {
+    transform: scale(0.97);
+  }
+  .modal-message {
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 4px;
+    font-size: 14px;
+    white-space: pre-wrap;
+  }
+
+  /* ============================================
+     空状態
+     ============================================ */
+  .empty {
+    text-align: center;
+    padding: 30px 16px;
+    color: #999;
+    font-size: 13px;
+  }
+  .empty .icon {
+    font-size: 38px;
+    opacity: 0.5;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  /* ============================================
+     CSV出力ボタン
+     ============================================ */
+  .csv-btn {
+    width: 100%;
+    padding: 12px;
+    background: #fff3e0;
+    color: #e65100;
+    border: 2px solid #ffb74d;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-top: 6px;
+    transition: all 0.15s;
+  }
+  .csv-btn:active {
+    background: #e65100;
+    color: #fff;
+  }
+
+  /* ============================================
+     カテゴリヘッダー（設定画面）
+     ============================================ */
+  .cat-section {
+    margin-bottom: 14px;
+  }
+  .cat-section h4 {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 6px;
+    padding: 4px 8px;
+    background: #f0f0f0;
+    border-radius: 6px;
+  }
+
+  /* ============================================
+     トグル
+     ============================================ */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+  .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: 0.2s;
+    border-radius: 24px;
+  }
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.2s;
+    border-radius: 50%;
+  }
+  input:checked + .slider {
+    background-color: #43a047;
+  }
+  input:checked + .slider:before {
+    transform: translateX(20px);
+  }
+
+  /* ============================================
+     トースト
+     ============================================ */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 90px;
+    transform: translateX(-50%);
+    background: rgba(46,125,50,0.95);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 700;
+    z-index: 2000;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s, bottom 0.25s;
+    max-width: 90%;
+    text-align: center;
+  }
+  .toast.show {
+    opacity: 1;
+    bottom: 100px;
+  }
+
+  /* ============================================
+     集計：同期インフォ
+     ============================================ */
+  .sync-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #e3f2fd;
+    border-radius: 10px;
+    font-size: 12px;
+    color: #1565c0;
+    margin-bottom: 10px;
+  }
+  .sync-info .small-btn {
+    padding: 6px 14px;
+    background: #1976d2;
+    color: #fff;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s;
+  }
+  .sync-info .small-btn:active { transform: scale(0.95); }
+  .sync-info .small-btn:disabled { background: #90caf9; }
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loader {
+    text-align: center; padding: 40px 16px; color: #666;
+  }
+  .loader .spinner-big {
+    width: 32px; height: 32px;
+    border: 4px solid #e0e0e0; border-top-color: #43a047;
+    border-radius: 50%; animation: spin 1s linear infinite;
+    margin: 0 auto 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================
+     ヘッダー
+     ============================================ -->
+<header class="header">
+  <h1>🍐 梨農家 売上管理</h1>
+  <div class="subtitle" id="todayDateLabel">本日の売上を入力</div>
+</header>
+
+<main class="main">
+
+  <!-- ============================================
+       ① 売上入力タブ
+       ============================================ -->
+  <section class="panel active" id="panel-input">
+
+    <!-- 本日の売上サマリ -->
+    <div class="today-summary">
+      <div class="label">本日の売上合計</div>
+      <div class="total"><span id="todayTotal">0</span><span class="yen">円</span></div>
+      <div class="count">販売点数: <span id="todayCount">0</span> 点</div>
+    </div>
+
+    <!-- 品種選択 -->
+    <div class="card">
+      <div class="card-title">🍐 品種を選ぶ</div>
+      <div class="variety-grid" id="varietyGrid"></div>
+    </div>
+
+    <!-- 商品選択 -->
+    <div class="card">
+      <div class="card-title">📦 商品を選ぶ</div>
+      <div id="productList"></div>
+    </div>
+
+    <!-- 個数 -->
+    <div class="card">
+      <div class="card-title">🔢 個数</div>
+      <div class="qty-row">
+        <button class="qty-btn" id="qtyMinus">−</button>
+        <input type="number" class="qty-input" id="qtyInput" value="1" min="1" inputmode="numeric">
+        <button class="qty-btn" id="qtyPlus">＋</button>
+      </div>
+    </div>
+
+    <!-- 追加ボタン -->
+    <button class="add-btn" id="addBtn" disabled>＋ 売上に追加</button>
+
+    <!-- 売上一覧 -->
+    <div class="card" style="margin-top:14px;">
+      <div class="card-title">📋 本日の売上一覧</div>
+      <ul class="sale-list" id="saleList"></ul>
+      <button class="reset-btn" id="resetTodayBtn">🔄 本日の売上をリセット</button>
+    </div>
+
+  </section>
+
+  <!-- ============================================
+       ② 集計タブ（スプレッドシートから取得）
+       ============================================ -->
+  <section class="panel" id="panel-stats">
+
+    <!-- 同期インフォ -->
+    <div class="sync-info">
+      <span id="syncInfo">📡 まだ取得していません</span>
+      <button class="small-btn" id="refreshStatsBtn">🔄 更新</button>
+    </div>
+
+    <!-- 集計サブタブ -->
+    <div class="subtab-bar" id="statsSubtabs">
+      <button class="subtab-btn active" data-mode="today">本日</button>
+      <button class="subtab-btn" data-mode="daily">日別</button>
+      <button class="subtab-btn" data-mode="monthly">月別</button>
+      <button class="subtab-btn" data-mode="category">商品種類別</button>
+      <button class="subtab-btn" data-mode="use">用途別</button>
+      <button class="subtab-btn" data-mode="size">サイズ別</button>
+      <button class="subtab-btn" data-mode="variety">品種別</button>
+      <button class="subtab-btn" data-mode="varietyMonth">品種×月別</button>
+    </div>
+
+    <!-- 合計表示 -->
+    <div class="stat-total">
+      <div>
+        <div class="label">期間内合計</div>
+        <div class="value"><span id="statTotal">0</span> 円</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="label">販売点数</div>
+        <div class="value"><span id="statCount">0</span></div>
+      </div>
+    </div>
+
+    <!-- 集計リスト -->
+    <div class="card">
+      <div class="card-title" id="statTitle">📊 集計</div>
+      <div id="statList"></div>
+    </div>
+
+  </section>
+
+  <!-- ============================================
+       ③ 設定タブ
+       ============================================ -->
+  <section class="panel" id="panel-settings">
+
+    <!-- 品種マスタ管理 -->
+    <div class="card">
+      <div class="card-title">🍐 品種マスタ</div>
+      <ul class="setting-list" id="varietyMaster"></ul>
+      <button class="add-row-btn" id="addVarietyBtn">＋ 品種を追加</button>
+    </div>
+
+    <!-- 商品マスタ管理 -->
+    <div class="card">
+      <div class="card-title">📦 商品マスタ</div>
+      <div id="productMaster"></div>
+      <button class="add-row-btn" id="addProductBtn">＋ 商品を追加</button>
+    </div>
+
+    <!-- データ管理 -->
+    <div class="card">
+      <div class="card-title">💾 データ管理</div>
+      <button class="csv-btn" id="csvBtn">📤 全データCSV出力</button>
+      <button class="info-btn" id="resetMasterBtn">🔁 品種・商品を初期設定に戻す</button>
+      <button class="danger-btn" id="deleteAllBtn">🗑 すべての売上データを削除</button>
+    </div>
+
+  </section>
+
+</main>
+
+<!-- ============================================
+     タブバー
+     ============================================ -->
+<nav class="tab-bar">
+  <button class="tab-btn active" data-tab="input">
+    <span class="icon">✍️</span>
+    売上入力
+  </button>
+  <button class="tab-btn" data-tab="stats">
+    <span class="icon">📊</span>
+    集計
+  </button>
+  <button class="tab-btn" data-tab="settings">
+    <span class="icon">⚙️</span>
+    設定
+  </button>
+</nav>
+
+<!-- ============================================
+     モーダル
+     ============================================ -->
+<div class="modal-overlay" id="modal">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<!-- トースト -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   梨農家 売上管理アプリ - JavaScript
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   Google Apps Script 連携用URL
+   ---------------------------------------------------------- */
+const GAS_URL = "https://script.google.com/macros/s/AKfycbw_HrRuSY1-xH3x5NFvJukO0l5eX63CsVnFnID-SaUmfVeSY-KZ7hv27SMoVHv8wDlg/exec";
+
+/* ----------------------------------------------------------
+   定数 - LocalStorage キー
+   ---------------------------------------------------------- */
+const LS_VARIETIES = 'pear_varieties_v1';
+const LS_PRODUCTS  = 'pear_products_v1';
+const LS_SALES     = 'pear_sales_v1';
+
+/* ----------------------------------------------------------
+   初期データ
+   ---------------------------------------------------------- */
+const DEFAULT_VARIETIES = [
+  { id: 'v1', name: '幸水',     visible: true },
+  { id: 'v2', name: '豊水',     visible: true },
+  { id: 'v3', name: 'あきづき', visible: true },
+  { id: 'v4', name: '新高',     visible: true },
+  { id: 'v5', name: '新興',     visible: true },
+];
+
+// 商品マスタ：カテゴリ + 用途 + サイズ + 価格
+const DEFAULT_PRODUCTS = [
+  // 5kg箱（贈答用）
+  { id: 'p1', category: '5kg箱', use: '贈答', size: '4L', price: 6000, visible: true },
+  { id: 'p2', category: '5kg箱', use: '贈答', size: '5L', price: 6200, visible: true },
+  { id: 'p3', category: '5kg箱', use: '贈答', size: '6L', price: 6500, visible: true },
+  // 3kg箱（贈答用）
+  { id: 'p4', category: '3kg箱', use: '贈答', size: '4L', price: 3600, visible: true },
+  { id: 'p5', category: '3kg箱', use: '贈答', size: '5L', price: 3800, visible: true },
+  // 3kg袋（家庭用）
+  { id: 'p6', category: '3kg袋', use: '家庭', size: '2L', price: 2500, visible: true },
+  { id: 'p7', category: '3kg袋', use: '家庭', size: '3L', price: 2700, visible: true },
+  { id: 'p8', category: '3kg袋', use: '家庭', size: '4L', price: 2900, visible: true },
+  // 2kg袋（家庭用）
+  { id: 'p9', category: '2kg袋', use: '家庭', size: '3L', price: 1800, visible: true },
+];
+
+/* ----------------------------------------------------------
+   ストア（LocalStorage 抽象化）
+   ---------------------------------------------------------- */
+const Store = {
+  load(key, fallback) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw == null) return fallback;
+      return JSON.parse(raw);
+    } catch (e) {
+      console.warn('load error', e);
+      return fallback;
+    }
+  },
+  save(key, data) {
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+    } catch (e) {
+      console.warn('save error', e);
+    }
+  }
+};
+
+/* ----------------------------------------------------------
+   状態
+   ---------------------------------------------------------- */
+let varieties = Store.load(LS_VARIETIES, null);
+if (!varieties) {
+  varieties = JSON.parse(JSON.stringify(DEFAULT_VARIETIES));
+  Store.save(LS_VARIETIES, varieties);
+}
+
+let products = Store.load(LS_PRODUCTS, null);
+if (!products) {
+  products = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+  Store.save(LS_PRODUCTS, products);
+}
+
+let sales = Store.load(LS_SALES, []);
+
+let selectedVarietyId = null;
+let selectedProductId = null;
+let currentTab = 'input';
+let statsMode = 'today';
+
+// 集計タブ用：スプレッドシートから取得したデータ
+let remoteSales = [];
+let lastFetchedAt = null;
+let isFetching = false;
+
+/* ----------------------------------------------------------
+   ユーティリティ
+   ---------------------------------------------------------- */
+function uid(prefix) {
+  return prefix + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+}
+function todayStr() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function nowTimeStr() {
+  const d = new Date();
+  const h = String(d.getHours()).padStart(2,'0');
+  const m = String(d.getMinutes()).padStart(2,'0');
+  return `${h}:${m}`;
+}
+function fmtYen(n) {
+  return Number(n).toLocaleString('ja-JP');
+}
+function getVariety(id) {
+  return varieties.find(v => v.id === id);
+}
+function getProduct(id) {
+  return products.find(p => p.id === id);
+}
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => el.classList.remove('show'), 1800);
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
+
+/* ----------------------------------------------------------
+   モーダル
+   ---------------------------------------------------------- */
+const modal = document.getElementById('modal');
+const modalContent = document.getElementById('modalContent');
+
+function showModal(html) {
+  modalContent.innerHTML = html;
+  modal.classList.add('show');
+}
+function closeModal() {
+  modal.classList.remove('show');
+}
+modal.addEventListener('click', (e) => {
+  if (e.target === modal) closeModal();
+});
+
+/** 確認ダイアログ */
+function confirmDialog(title, message, opts) {
+  opts = opts || {};
+  return new Promise(resolve => {
+    const danger = opts.danger ? 'danger' : 'ok';
+    showModal(`
+      <h3>${escapeHtml(title)}</h3>
+      <p class="modal-message">${escapeHtml(message)}</p>
+      <div class="modal-actions">
+        <button class="cancel" id="cd-cancel">キャンセル</button>
+        <button class="${danger}" id="cd-ok">${escapeHtml(opts.okLabel || 'OK')}</button>
+      </div>
+    `);
+    document.getElementById('cd-cancel').onclick = () => { closeModal(); resolve(false); };
+    document.getElementById('cd-ok').onclick     = () => { closeModal(); resolve(true);  };
+  });
+}
+
+/** 入力ダイアログ（汎用） */
+function promptDialog(title, fields, initial) {
+  initial = initial || {};
+  return new Promise(resolve => {
+    const fieldHtml = fields.map(f => {
+      const val = initial[f.name] != null ? String(initial[f.name]) : '';
+      if (f.type === 'select') {
+        const opts = f.options.map(o => `<option value="${escapeHtml(o.value)}" ${o.value === val ? 'selected' : ''}>${escapeHtml(o.label)}</option>`).join('');
+        return `<div class="field">
+          <label>${escapeHtml(f.label)}</label>
+          <select name="${f.name}">${opts}</select>
+        </div>`;
+      }
+      const inputType = f.type || 'text';
+      const inputmode = f.type === 'number' ? 'inputmode="decimal"' : '';
+      return `<div class="field">
+        <label>${escapeHtml(f.label)}</label>
+        <input type="${inputType}" name="${f.name}" ${inputmode} value="${escapeHtml(val)}" ${f.placeholder ? `placeholder="${escapeHtml(f.placeholder)}"` : ''}>
+      </div>`;
+    }).join('');
+    showModal(`
+      <h3>${escapeHtml(title)}</h3>
+      ${fieldHtml}
+      <div class="modal-actions">
+        <button class="cancel" id="pd-cancel">キャンセル</button>
+        <button class="ok" id="pd-ok">保存</button>
+      </div>
+    `);
+    document.getElementById('pd-cancel').onclick = () => { closeModal(); resolve(null); };
+    document.getElementById('pd-ok').onclick = () => {
+      const result = {};
+      fields.forEach(f => {
+        const el = modalContent.querySelector(`[name="${f.name}"]`);
+        result[f.name] = el ? el.value : '';
+      });
+      // バリデーション
+      for (const f of fields) {
+        if (f.required && !String(result[f.name]).trim()) {
+          showToast(f.label + 'を入力してください');
+          return;
+        }
+        if (f.type === 'number') {
+          const n = Number(result[f.name]);
+          if (isNaN(n) || n < 0) { showToast(f.label + 'が不正です'); return; }
+          result[f.name] = n;
+        }
+      }
+      closeModal();
+      resolve(result);
+    };
+  });
+}
+
+/* ----------------------------------------------------------
+   タブ切り替え
+   ---------------------------------------------------------- */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+    document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tab));
+    currentTab = tab;
+    if (tab === 'stats') {
+      // 初回 or 未取得ならスプレッドシートから自動取得
+      if (remoteSales.length === 0 && !isFetching) {
+        fetchStats();
+      } else {
+        renderStats();
+      }
+    }
+    if (tab === 'settings') renderSettings();
+    if (tab === 'input') renderTodaySales();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+
+/* ----------------------------------------------------------
+   売上入力 - 品種ボタン描画
+   ---------------------------------------------------------- */
+function renderVarieties() {
+  const grid = document.getElementById('varietyGrid');
+  const visibleVars = varieties.filter(v => v.visible !== false);
+  if (visibleVars.length === 0) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1;">品種がありません<br>設定で追加してください</div>';
+    return;
+  }
+  grid.innerHTML = visibleVars.map(v => `
+    <button class="variety-btn ${v.id === selectedVarietyId ? 'selected' : ''}" data-vid="${v.id}">
+      ${escapeHtml(v.name)}
+    </button>
+  `).join('');
+  grid.querySelectorAll('.variety-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedVarietyId = btn.dataset.vid;
+      renderVarieties();
+      updateAddBtnState();
+    });
+  });
+}
+
+/* ----------------------------------------------------------
+   売上入力 - 商品ボタン描画（カテゴリごと）
+   ---------------------------------------------------------- */
+function renderProducts() {
+  const wrap = document.getElementById('productList');
+  const visibleProds = products.filter(p => p.visible !== false);
+  if (visibleProds.length === 0) {
+    wrap.innerHTML = '<div class="empty">商品がありません<br>設定で追加してください</div>';
+    return;
+  }
+
+  // カテゴリ + 用途 でグルーピング
+  const groups = {};
+  const order = [];
+  visibleProds.forEach(p => {
+    const key = `${p.category}_${p.use}`;
+    if (!groups[key]) {
+      groups[key] = { category: p.category, use: p.use, items: [] };
+      order.push(key);
+    }
+    groups[key].items.push(p);
+  });
+
+  wrap.innerHTML = order.map(key => {
+    const g = groups[key];
+    const useClass = g.use === '家庭' ? 'use-home' : '';
+    const itemsHtml = g.items.map(p => `
+      <button class="product-btn ${p.id === selectedProductId ? 'selected' : ''}" data-pid="${p.id}">
+        <span class="size">${escapeHtml(p.size)}</span>
+        <span class="price">${fmtYen(p.price)}円</span>
+      </button>
+    `).join('');
+    return `
+      <div class="category-section">
+        <div class="category-label">
+          <span>${escapeHtml(g.category)}</span>
+          <span class="badge ${useClass}">${escapeHtml(g.use)}用</span>
+        </div>
+        <div class="product-grid">${itemsHtml}</div>
+      </div>
+    `;
+  }).join('');
+
+  wrap.querySelectorAll('.product-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      selectedProductId = btn.dataset.pid;
+      renderProducts();
+      updateAddBtnState();
+    });
+  });
+}
+
+/* ----------------------------------------------------------
+   売上入力 - 個数入力
+   ---------------------------------------------------------- */
+const qtyInput = document.getElementById('qtyInput');
+document.getElementById('qtyMinus').addEventListener('click', () => {
+  const v = Math.max(1, (parseInt(qtyInput.value, 10) || 1) - 1);
+  qtyInput.value = v;
+});
+document.getElementById('qtyPlus').addEventListener('click', () => {
+  const v = (parseInt(qtyInput.value, 10) || 1) + 1;
+  qtyInput.value = v;
+});
+qtyInput.addEventListener('input', () => {
+  let v = parseInt(qtyInput.value, 10);
+  if (isNaN(v) || v < 1) v = 1;
+  if (v > 9999) v = 9999;
+  qtyInput.value = v;
+});
+
+/* ----------------------------------------------------------
+   売上入力 - 追加ボタン状態
+   ---------------------------------------------------------- */
+function updateAddBtnState() {
+  const btn = document.getElementById('addBtn');
+  btn.disabled = !(selectedVarietyId && selectedProductId);
+}
+
+/* ----------------------------------------------------------
+   売上入力 - 追加処理
+   ---------------------------------------------------------- */
+document.getElementById('addBtn').addEventListener('click', () => {
+  if (!selectedVarietyId || !selectedProductId) return;
+  const variety = getVariety(selectedVarietyId);
+  const product = getProduct(selectedProductId);
+  const qty = Math.max(1, parseInt(qtyInput.value, 10) || 1);
+
+  // 売上データ：仕様の項目を必ず含める
+  const sale = {
+    id:           uid('s'),
+    date:         todayStr(),                                 // YYYY-MM-DD
+    time:         nowTimeStr(),                               // HH:MM
+    varietyId:    variety.id,
+    variety:      variety.name,                               // 品種
+    productId:    product.id,
+    productName:  `${product.category} ${product.size}`,      // 商品（表示名）
+    category:     product.category,                           // カテゴリ
+    use:          product.use,                                // 用途
+    size:         product.size,                               // サイズ
+    price:        product.price,                              // 単価
+    qty:          qty,                                         // 個数
+    amount:       product.price * qty,                         // 金額
+  };
+
+  // ▼▼▼ Google Apps Script（Googleスプレッドシート）に送信 ▼▼▼
+  // mode:"no-cors" のため応答は読めないが、送信自体は実行される。
+  // 通信失敗してもこの後のLocalStorage保存は必ず実行される。
+  fetch(GAS_URL, {
+    method: "POST",
+    mode: "no-cors",
+    body: JSON.stringify(sale),
+    headers: {
+      "Content-Type": "application/json"
+    }
+  });
+  // ▲▲▲ ここまでGAS送信 ▲▲▲
+
+  // ▼▼▼ LocalStorageへ保存（残す） ▼▼▼
+  sales.push(sale);
+  Store.save(LS_SALES, sales);
+
+  // 追加時アニメーション
+  const btn = document.getElementById('addBtn');
+  btn.classList.remove('flash');
+  void btn.offsetWidth;
+  btn.classList.add('flash');
+
+  // 入力リセット
+  selectedVarietyId = null;
+  selectedProductId = null;
+  qtyInput.value = 1;
+  renderVarieties();
+  renderProducts();
+  updateAddBtnState();
+  renderTodaySales();
+});
+
+/* ----------------------------------------------------------
+   売上入力 - 本日売上表示
+   ---------------------------------------------------------- */
+function renderTodaySales() {
+  const today = todayStr();
+  const todays = sales.filter(s => s.date === today)
+                      .sort((a, b) => (b.time || '').localeCompare(a.time || ''));
+  const total = todays.reduce((s, x) => s + x.amount, 0);
+  const count = todays.reduce((s, x) => s + x.qty, 0);
+
+  document.getElementById('todayTotal').textContent = fmtYen(total);
+  document.getElementById('todayCount').textContent = fmtYen(count);
+
+  // ヘッダー日付ラベル
+  document.getElementById('todayDateLabel').textContent = `${today}（本日）`;
+
+  const list = document.getElementById('saleList');
+  if (todays.length === 0) {
+    list.innerHTML = '<div class="empty"><span class="icon">📭</span>本日の売上はまだありません</div>';
+    return;
+  }
+  list.innerHTML = todays.map(s => `
+    <li class="sale-item" data-id="${s.id}">
+      <div class="sale-info">
+        <div class="sale-time">${escapeHtml(s.date)} ${escapeHtml(s.time)}　${escapeHtml(s.variety)}</div>
+        <div class="sale-name">${escapeHtml(s.productName)}</div>
+        <div class="sale-detail">${escapeHtml(s.use)}用 / ${escapeHtml(s.size)} / ${fmtYen(s.price)}円 × ${s.qty}</div>
+      </div>
+      <div class="sale-amount">
+        ${fmtYen(s.amount)}円
+        <div class="sale-qty">${s.qty}点</div>
+      </div>
+      <button class="sale-del-btn" data-id="${s.id}" aria-label="削除">×</button>
+    </li>
+  `).join('');
+
+  list.querySelectorAll('.sale-del-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const id = btn.dataset.id;
+      const ok = await confirmDialog('削除しますか？', 'この売上を削除します。\n元に戻せません。', { danger: true, okLabel: '削除' });
+      if (!ok) return;
+      const li = list.querySelector(`.sale-item[data-id="${id}"]`);
+      if (li) {
+        li.classList.add('removing');
+        setTimeout(() => {
+          sales = sales.filter(s => s.id !== id);
+          Store.save(LS_SALES, sales);
+          renderTodaySales();
+          if (currentTab === 'stats') renderStats();
+        }, 280);
+      } else {
+        sales = sales.filter(s => s.id !== id);
+        Store.save(LS_SALES, sales);
+        renderTodaySales();
+      }
+      showToast('削除しました');
+    });
+  });
+}
+
+/* ----------------------------------------------------------
+   本日リセット
+   ---------------------------------------------------------- */
+document.getElementById('resetTodayBtn').addEventListener('click', async () => {
+  const today = todayStr();
+  const todays = sales.filter(s => s.date === today);
+  if (todays.length === 0) {
+    showToast('本日の売上はありません');
+    return;
+  }
+  const ok = await confirmDialog('本日の売上をリセット',
+    `本日（${today}）の売上 ${todays.length} 件を削除します。\nよろしいですか？`,
+    { danger: true, okLabel: 'リセット' });
+  if (!ok) return;
+  sales = sales.filter(s => s.date !== today);
+  Store.save(LS_SALES, sales);
+  renderTodaySales();
+  showToast('本日の売上をリセットしました');
+});
+
+/* ============================================================
+   ② 集計タブ
+   ============================================================ */
+document.querySelectorAll('#statsSubtabs .subtab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#statsSubtabs .subtab-btn').forEach(b => b.classList.toggle('active', b === btn));
+    statsMode = btn.dataset.mode;
+    renderStats();
+  });
+});
+
+function aggregate(arr, keyFn) {
+  const map = new Map();
+  for (const s of arr) {
+    const k = keyFn(s);
+    if (!map.has(k)) map.set(k, { label: k, amount: 0, count: 0 });
+    const g = map.get(k);
+    g.amount += s.amount;
+    g.count  += s.qty;
+  }
+  return Array.from(map.values());
+}
+
+/* ----------------------------------------------------------
+   スプレッドシートから売上を取得
+   ---------------------------------------------------------- */
+async function fetchStats() {
+  if (isFetching) return;
+  isFetching = true;
+  const btn = document.getElementById('refreshStatsBtn');
+  const info = document.getElementById('syncInfo');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> 更新中';
+  info.textContent = '📡 取得中...';
+  document.getElementById('statList').innerHTML =
+    '<div class="loader"><div class="spinner-big"></div>スプレッドシートから取得中...</div>';
+
+  try {
+    const res = await fetch(GAS_URL, { method: 'GET', redirect: 'follow' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || '取得失敗');
+    remoteSales = Array.isArray(data.data) ? data.data : [];
+    lastFetchedAt = new Date();
+    const hh = String(lastFetchedAt.getHours()).padStart(2,'0');
+    const mm = String(lastFetchedAt.getMinutes()).padStart(2,'0');
+    info.textContent = '✅ ' + remoteSales.length + '件を取得（' + hh + ':' + mm + '）';
+    renderStats();
+  } catch (err) {
+    info.textContent = '❌ 取得失敗: ' + (err.message || err);
+    document.getElementById('statList').innerHTML =
+      '<div class="empty"><span class="icon">⚠️</span>取得に失敗しました<br><small>' + escapeHtml(err.message || String(err)) + '</small></div>';
+    showToast('取得失敗: ' + (err.message || err));
+  } finally {
+    isFetching = false;
+    btn.disabled = false;
+    btn.innerHTML = '🔄 更新';
+  }
+}
+
+document.getElementById('refreshStatsBtn').addEventListener('click', () => fetchStats());
+
+function renderStats() {
+  const list   = document.getElementById('statList');
+  const titleEl= document.getElementById('statTitle');
+  const totalEl= document.getElementById('statTotal');
+  const countEl= document.getElementById('statCount');
+
+  // ▼ スプレッドシートから取得した remoteSales を使う（全端末共有）
+  let target = remoteSales.slice();
+  let groups = []; // [{label, amount, count}]
+  let title  = '📊 集計';
+  let timeOrder = false; // 日別/月別/品種×月別は時系列降順
+
+  if (statsMode === 'today') {
+    title = '📊 本日の売上（商品別）';
+    target = target.filter(s => s.date === todayStr());
+    groups = aggregate(target, s => `${s.productName}（${s.variety}）`);
+  } else if (statsMode === 'daily') {
+    title = '📅 日別売上';
+    groups = aggregate(target, s => s.date);
+    timeOrder = true;
+  } else if (statsMode === 'monthly') {
+    title = '🗓 月別売上';
+    groups = aggregate(target, s => (s.date || '').slice(0, 7));
+    timeOrder = true;
+  } else if (statsMode === 'category') {
+    title = '📦 商品種類別（カテゴリ）';
+    groups = aggregate(target, s => s.category || '(未分類)');
+  } else if (statsMode === 'use') {
+    title = '🎁 用途別（贈答／家庭）';
+    groups = aggregate(target, s => (s.use || '(未分類)') + '用');
+  } else if (statsMode === 'size') {
+    title = '📏 サイズ別';
+    groups = aggregate(target, s => s.size || '(未分類)');
+  } else if (statsMode === 'variety') {
+    title = '🍐 品種別';
+    groups = aggregate(target, s => s.variety || '(未分類)');
+  } else if (statsMode === 'varietyMonth') {
+    title = '🍐×🗓 品種×月別';
+    groups = aggregate(target, s => `${(s.date || '').slice(0,7)}　${s.variety || '(未分類)'}`);
+    timeOrder = true;
+  }
+
+  // ソート
+  if (timeOrder) {
+    groups.sort((a, b) => b.label.localeCompare(a.label));
+  } else {
+    groups.sort((a, b) => b.amount - a.amount);
+  }
+
+  const total = target.reduce((s, x) => s + x.amount, 0);
+  const count = target.reduce((s, x) => s + x.qty, 0);
+
+  totalEl.textContent = fmtYen(total);
+  countEl.textContent = fmtYen(count);
+  titleEl.textContent = title;
+
+  if (groups.length === 0) {
+    if (remoteSales.length === 0) {
+      list.innerHTML = '<div class="empty"><span class="icon">📊</span>「🔄 更新」を押してスプレッドシートから取得してください</div>';
+    } else {
+      list.innerHTML = '<div class="empty"><span class="icon">📊</span>該当データがありません</div>';
+    }
+    return;
+  }
+
+  list.innerHTML = groups.map((g, i) => {
+    const isRank = !timeOrder && i < 3;
+    const rankCls = isRank ? `rank-${i+1}` : '';
+    const rankLabel = isRank ? ['🥇','🥈','🥉'][i] : (i+1) + '.';
+    return `
+      <div class="stat-row ${rankCls}">
+        <div style="flex:1;min-width:0;">
+          <span class="stat-rank">${rankLabel}</span>
+          <span class="stat-label">${escapeHtml(g.label)}</span>
+        </div>
+        <div class="stat-value">
+          <div class="stat-amount">${fmtYen(g.amount)} 円</div>
+          <div class="stat-count">${fmtYen(g.count)} 点</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ============================================================
+   ③ 設定タブ
+   ============================================================ */
+function renderSettings() {
+  renderVarietyMaster();
+  renderProductMaster();
+}
+
+/* --- 品種マスタ --- */
+function renderVarietyMaster() {
+  const ul = document.getElementById('varietyMaster');
+  if (varieties.length === 0) {
+    ul.innerHTML = '<div class="empty">品種がありません</div>';
+    return;
+  }
+  ul.innerHTML = varieties.map(v => `
+    <li class="setting-item">
+      <div class="info">
+        <div class="name">${escapeHtml(v.name)}</div>
+        <div class="meta">${v.visible !== false ? '入力画面に表示中' : '非表示'}</div>
+      </div>
+      <label class="switch" title="表示/非表示">
+        <input type="checkbox" data-vid="${v.id}" class="vis-toggle" ${v.visible !== false ? 'checked' : ''}>
+        <span class="slider"></span>
+      </label>
+      <button class="icon-btn edit-btn" data-vid="${v.id}" title="編集">✏️</button>
+      <button class="icon-btn del-btn" data-vid="${v.id}" title="削除">🗑</button>
+    </li>
+  `).join('');
+
+  ul.querySelectorAll('.vis-toggle').forEach(el => {
+    el.addEventListener('change', () => {
+      const v = getVariety(el.dataset.vid);
+      v.visible = el.checked;
+      Store.save(LS_VARIETIES, varieties);
+      renderVarieties();
+      renderVarietyMaster();
+    });
+  });
+
+  ul.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const v = getVariety(btn.dataset.vid);
+      const result = await promptDialog('品種を編集', [
+        { name: 'name', label: '品種名', required: true }
+      ], { name: v.name });
+      if (!result) return;
+      v.name = result.name.trim();
+      Store.save(LS_VARIETIES, varieties);
+      renderVarietyMaster();
+      renderVarieties();
+      showToast('保存しました');
+    });
+  });
+
+  ul.querySelectorAll('.del-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const v = getVariety(btn.dataset.vid);
+      const ok = await confirmDialog('品種を削除', `「${v.name}」を削除します。\n（過去の売上データは残ります）`, { danger: true, okLabel: '削除' });
+      if (!ok) return;
+      varieties = varieties.filter(x => x.id !== v.id);
+      Store.save(LS_VARIETIES, varieties);
+      renderVarietyMaster();
+      renderVarieties();
+      showToast('削除しました');
+    });
+  });
+}
+
+document.getElementById('addVarietyBtn').addEventListener('click', async () => {
+  const result = await promptDialog('品種を追加', [
+    { name: 'name', label: '品種名', required: true, placeholder: '例：南水' }
+  ]);
+  if (!result) return;
+  varieties.push({ id: uid('v'), name: result.name.trim(), visible: true });
+  Store.save(LS_VARIETIES, varieties);
+  renderVarietyMaster();
+  renderVarieties();
+  showToast('追加しました');
+});
+
+/* --- 商品マスタ --- */
+function renderProductMaster() {
+  const wrap = document.getElementById('productMaster');
+  if (products.length === 0) {
+    wrap.innerHTML = '<div class="empty">商品がありません</div>';
+    return;
+  }
+  // カテゴリ+用途でグルーピング
+  const groups = {};
+  const order = [];
+  products.forEach(p => {
+    const key = `${p.category}（${p.use}用）`;
+    if (!groups[key]) {
+      groups[key] = [];
+      order.push(key);
+    }
+    groups[key].push(p);
+  });
+
+  wrap.innerHTML = order.map(key => {
+    const items = groups[key];
+    return `
+      <div class="cat-section">
+        <h4>${escapeHtml(key)}</h4>
+        <ul class="setting-list">
+          ${items.map(p => `
+            <li class="setting-item">
+              <div class="info">
+                <div class="name">${escapeHtml(p.size)}　${fmtYen(p.price)}円</div>
+                <div class="meta">${p.visible !== false ? '入力画面に表示中' : '非表示'}</div>
+              </div>
+              <label class="switch" title="表示/非表示">
+                <input type="checkbox" data-pid="${p.id}" class="vis-toggle-p" ${p.visible !== false ? 'checked' : ''}>
+                <span class="slider"></span>
+              </label>
+              <button class="icon-btn edit-btn" data-pid="${p.id}" title="編集">✏️</button>
+              <button class="icon-btn del-btn" data-pid="${p.id}" title="削除">🗑</button>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+    `;
+  }).join('');
+
+  wrap.querySelectorAll('.vis-toggle-p').forEach(el => {
+    el.addEventListener('change', () => {
+      const p = getProduct(el.dataset.pid);
+      p.visible = el.checked;
+      Store.save(LS_PRODUCTS, products);
+      renderProducts();
+      renderProductMaster();
+    });
+  });
+
+  wrap.querySelectorAll('.edit-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const p = getProduct(btn.dataset.pid);
+      const result = await promptDialog('商品を編集', [
+        { name: 'category', label: 'カテゴリ', required: true, placeholder: '例：5kg箱' },
+        { name: 'use',      label: '用途', type: 'select', options: [
+          { value: '贈答', label: '贈答用' },
+          { value: '家庭', label: '家庭用' },
+        ] },
+        { name: 'size',     label: 'サイズ', required: true, placeholder: '例：4L' },
+        { name: 'price',    label: '価格（円）', type: 'number', required: true },
+      ], { category: p.category, use: p.use, size: p.size, price: p.price });
+      if (!result) return;
+      p.category = result.category.trim();
+      p.use      = result.use;
+      p.size     = result.size.trim();
+      p.price    = Number(result.price) || 0;
+      Store.save(LS_PRODUCTS, products);
+      renderProductMaster();
+      renderProducts();
+      showToast('保存しました');
+    });
+  });
+
+  wrap.querySelectorAll('.del-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const p = getProduct(btn.dataset.pid);
+      const ok = await confirmDialog('商品を削除', `「${p.category} ${p.size}」を削除します。\n（過去の売上データは残ります）`, { danger: true, okLabel: '削除' });
+      if (!ok) return;
+      products = products.filter(x => x.id !== p.id);
+      Store.save(LS_PRODUCTS, products);
+      renderProductMaster();
+      renderProducts();
+      showToast('削除しました');
+    });
+  });
+}
+
+document.getElementById('addProductBtn').addEventListener('click', async () => {
+  const result = await promptDialog('商品を追加', [
+    { name: 'category', label: 'カテゴリ', required: true, placeholder: '例：5kg箱' },
+    { name: 'use',      label: '用途', type: 'select', options: [
+      { value: '贈答', label: '贈答用' },
+      { value: '家庭', label: '家庭用' },
+    ] },
+    { name: 'size',     label: 'サイズ', required: true, placeholder: '例：4L' },
+    { name: 'price',    label: '価格（円）', type: 'number', required: true },
+  ], { use: '贈答' });
+  if (!result) return;
+  products.push({
+    id: uid('p'),
+    category: result.category.trim(),
+    use:      result.use,
+    size:     result.size.trim(),
+    price:    Number(result.price) || 0,
+    visible:  true
+  });
+  Store.save(LS_PRODUCTS, products);
+  renderProductMaster();
+  renderProducts();
+  showToast('追加しました');
+});
+
+/* --- 初期設定に戻す --- */
+document.getElementById('resetMasterBtn').addEventListener('click', async () => {
+  const ok = await confirmDialog('初期設定に戻す',
+    '品種マスタと商品マスタを初期状態に戻します。\n（売上データは残ります）',
+    { danger: false, okLabel: '戻す' });
+  if (!ok) return;
+  varieties = JSON.parse(JSON.stringify(DEFAULT_VARIETIES));
+  products  = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+  Store.save(LS_VARIETIES, varieties);
+  Store.save(LS_PRODUCTS, products);
+  selectedVarietyId = null;
+  selectedProductId = null;
+  renderVarieties();
+  renderProducts();
+  renderSettings();
+  showToast('初期設定に戻しました');
+});
+
+/* --- 全削除 --- */
+document.getElementById('deleteAllBtn').addEventListener('click', async () => {
+  if (sales.length === 0) {
+    showToast('売上データがありません');
+    return;
+  }
+  const ok1 = await confirmDialog('全データ削除',
+    'すべての売上データを削除します。\n本当によろしいですか？',
+    { danger: true, okLabel: '次へ' });
+  if (!ok1) return;
+  const ok2 = await confirmDialog('最終確認',
+    `${sales.length} 件の売上データを完全に削除します。\nこの操作は取り消せません。`,
+    { danger: true, okLabel: '完全に削除' });
+  if (!ok2) return;
+  sales = [];
+  Store.save(LS_SALES, sales);
+  renderTodaySales();
+  if (currentTab === 'stats') renderStats();
+  showToast('全削除しました');
+});
+
+/* --- CSV出力 --- */
+document.getElementById('csvBtn').addEventListener('click', () => {
+  if (sales.length === 0) {
+    showToast('出力するデータがありません');
+    return;
+  }
+  const headers = ['日付','時刻','品種','商品','カテゴリ','用途','サイズ','単価','個数','金額'];
+  const rows = sales.slice().sort((a, b) => {
+    return ((a.date || '') + (a.time || '')).localeCompare((b.date || '') + (b.time || ''));
+  }).map(s => [
+    s.date, s.time, s.variety, s.productName, s.category, s.use, s.size, s.price, s.qty, s.amount
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(cell => {
+    const v = String(cell == null ? '' : cell);
+    if (/[",\n\r]/.test(v)) return '"' + v.replace(/"/g, '""') + '"';
+    return v;
+  }).join(',')).join('\r\n');
+
+  // BOM付きUTF-8
+  const bom = '﻿';
+  const blob = new Blob([bom + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `pear_sales_${todayStr()}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast('CSVをダウンロードしました');
+});
+
+/* ============================================================
+   初期化
+   ============================================================ */
+function init() {
+  renderVarieties();
+  renderProducts();
+  renderTodaySales();
+  updateAddBtnState();
+}
+init();
+
+/* ----------------------------------------------------------
+   オフライン対応：
+   このファイルは外部リソースを一切使わないため、
+   端末にダウンロードして直接開けばオフラインでも動作します。
+   データはすべてLocalStorageに保存されます。
+   ---------------------------------------------------------- */
+window.addEventListener('beforeunload', () => {
+  Store.save(LS_VARIETIES, varieties);
+  Store.save(LS_PRODUCTS, products);
+  Store.save(LS_SALES, sales);
+});
+</script>
+</body>
+</html>
