@@ -30,12 +30,15 @@
   html, body {
     margin: 0;
     padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
-    background: #f5f7f5;
-    color: #222;
+    font-family: "Hiragino Maru Gothic ProN", "ヒラギノ丸ゴ ProN W4", "Hiragino Sans", "Yu Gothic", -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #faf6ed;       /* 温かみのあるクリーム */
+    color: #4a4530;            /* 深いオリーブブラウン */
     font-size: 16px;
     -webkit-text-size-adjust: 100%;
     overscroll-behavior: none;
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(168, 181, 106, 0.06) 0, transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(212, 169, 59, 0.05) 0, transparent 40%);
   }
   body {
     padding-bottom: 80px; /* タブバー分の余白 */
@@ -57,27 +60,51 @@
   }
 
   /* ============================================
-     ヘッダー
+     ヘッダー（モトマルノーサン風）
      ============================================ */
   .header {
-    background: linear-gradient(135deg, #2e7d32 0%, #43a047 100%);
-    color: #fff;
-    padding: 14px 16px;
+    background: linear-gradient(135deg, #8a9a5b 0%, #a8b56a 100%);
+    color: #faf6ed;
+    padding: 12px 16px;
     text-align: center;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 8px rgba(74, 69, 48, 0.12);
     position: sticky;
     top: 0;
     z-index: 100;
+    border-bottom: 3px double #d4a93b;
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .header-logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #faf6ed;
+    padding: 2px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    object-fit: cover;
   }
   .header h1 {
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 700;
-    letter-spacing: 0.5px;
+    letter-spacing: 1.5px;
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
   }
   .header .subtitle {
     font-size: 11px;
-    opacity: 0.9;
-    margin-top: 2px;
+    opacity: 0.95;
+    margin-top: 4px;
+    letter-spacing: 1px;
+  }
+  .header .subtitle::before,
+  .header .subtitle::after {
+    content: "·";
+    margin: 0 8px;
+    opacity: 0.7;
   }
 
   /* ============================================
@@ -88,11 +115,11 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: #fff;
+    background: #fffdf6;
     display: flex;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 -2px 10px rgba(74, 69, 48, 0.1);
     z-index: 100;
-    border-top: 1px solid #e0e0e0;
+    border-top: 2px solid #d8dcae;
   }
   .tab-btn {
     flex: 1;
@@ -109,7 +136,7 @@
     margin-bottom: 2px;
   }
   .tab-btn.active {
-    color: #2e7d32;
+    color: #6d7a3e;
     font-weight: 700;
   }
   .tab-btn:active {
@@ -138,83 +165,112 @@
   }
 
   /* ============================================
-     カード
+     カード（モトマルノーサン風）
      ============================================ */
   .card {
-    background: #fff;
-    border-radius: 12px;
+    background: #fffdf6;
+    border-radius: 14px;
     padding: 14px;
     margin-bottom: 12px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 6px rgba(74, 69, 48, 0.06);
+    border: 1px solid #ece4cc;
   }
   .card-title {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
-    color: #2e7d32;
-    margin-bottom: 10px;
-    padding-bottom: 6px;
-    border-bottom: 2px solid #e8f5e9;
+    color: #6d7a3e;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed #c8cfa1;
     display: flex;
     align-items: center;
     gap: 6px;
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+    letter-spacing: 1px;
   }
 
   /* ============================================
-     品種選択ボタン
+     品種選択ボタン（大きく見やすく）
      ============================================ */
   .variety-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 10px;
   }
   .variety-btn {
-    padding: 14px 6px;
-    border: 2px solid #c8e6c9;
-    background: #fff;
-    border-radius: 10px;
+    padding: 18px 8px;
+    border: 2px solid #c8cfa1;
+    background: #fffdf6;
+    border-radius: 12px;
     font-weight: 700;
-    font-size: 15px;
-    color: #2e7d32;
+    font-size: 19px;
+    color: #6d7a3e;
     transition: all 0.2s;
-    min-height: 50px;
+    min-height: 64px;
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+    letter-spacing: 2px;
+    position: relative;
+  }
+  .variety-btn::before {
+    content: "🍐";
+    display: block;
+    font-size: 18px;
+    margin-bottom: 2px;
+    opacity: 0.85;
   }
   .variety-btn:active {
     transform: scale(0.95);
   }
   .variety-btn.selected {
-    background: linear-gradient(135deg, #43a047, #66bb6a);
-    color: #fff;
-    border-color: #2e7d32;
-    box-shadow: 0 4px 10px rgba(67,160,71,0.4);
+    background: linear-gradient(135deg, #8a9a5b, #a8b56a);
+    color: #faf6ed;
+    border-color: #6d7a3e;
+    box-shadow: 0 4px 12px rgba(109, 122, 62, 0.35);
+  }
+  .variety-btn.selected::before {
+    opacity: 1;
   }
 
   /* ============================================
-     商品ボタン（カテゴリごと）
+     商品カテゴリ見出し（くっきり区切る）
      ============================================ */
   .category-section {
-    margin-bottom: 12px;
+    margin-bottom: 18px;
+    padding: 10px 8px 4px;
+    background: #fbf8ec;
+    border-radius: 10px;
+    border-left: 4px solid #a8b56a;
+  }
+  .category-section:has(.product-row.has-qty) {
+    border-left-color: #d4a93b;
+    background: #faf2dd;
   }
   .category-label {
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 700;
-    color: #555;
-    margin-bottom: 6px;
-    padding-left: 4px;
+    color: #5a5836;
+    margin-bottom: 10px;
+    padding-left: 6px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+    letter-spacing: 1px;
   }
   .category-label .badge {
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 8px;
-    background: #e8f5e9;
-    color: #2e7d32;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    background: #f0ecd8;
+    color: #6d7a3e;
     font-weight: 700;
+    border: 1px solid #c8cfa1;
+    letter-spacing: 0.5px;
   }
   .category-label .badge.use-home {
-    background: #fff3e0;
-    color: #e65100;
+    background: #faf2dd;
+    color: #8b6a2b;
+    border-color: #ecd9a5;
   }
   .product-grid {
     display: grid;
@@ -223,7 +279,7 @@
   }
   .product-btn {
     padding: 10px 6px;
-    border: 2px solid #ffe0b2;
+    border: 2px solid #ecd9a5;
     background: #fff;
     border-radius: 10px;
     text-align: center;
@@ -238,7 +294,7 @@
   .product-btn .size {
     font-size: 16px;
     font-weight: 700;
-    color: #e65100;
+    color: #8b6a2b;
   }
   .product-btn .price {
     font-size: 12px;
@@ -248,8 +304,8 @@
     transform: scale(0.95);
   }
   .product-btn.selected {
-    background: linear-gradient(135deg, #fb8c00, #ffa726);
-    border-color: #e65100;
+    background: linear-gradient(135deg, #c89933, #e0b653);
+    border-color: #8b6a2b;
     box-shadow: 0 4px 10px rgba(251,140,0,0.4);
   }
   .product-btn.selected .size,
@@ -270,7 +326,7 @@
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background: #43a047;
+    background: #8a9a5b;
     color: #fff;
     font-size: 26px;
     font-weight: 700;
@@ -279,7 +335,7 @@
   }
   .qty-btn:active {
     transform: scale(0.92);
-    background: #2e7d32;
+    background: #6d7a3e;
   }
   .qty-input {
     width: 80px;
@@ -287,7 +343,7 @@
     text-align: center;
     font-size: 22px;
     font-weight: 700;
-    border: 2px solid #c8e6c9;
+    border: 2px solid #d8dcae;
     border-radius: 10px;
     color: #222;
   }
@@ -298,14 +354,17 @@
   .add-btn {
     width: 100%;
     padding: 16px;
-    background: linear-gradient(135deg, #f57c00, #ff9800);
-    color: #fff;
-    font-size: 18px;
+    background: linear-gradient(135deg, #b88c2a, #d4a93b);
+    color: #faf6ed;
+    font-size: 17px;
     font-weight: 700;
     border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(245,124,0,0.35);
+    box-shadow: 0 4px 10px rgba(184, 140, 42, 0.3);
     transition: all 0.2s;
     margin-top: 8px;
+    letter-spacing: 1.5px;
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+    border: 1px solid #8b6a2b;
   }
   .add-btn:active {
     transform: scale(0.97);
@@ -318,7 +377,7 @@
   /* 追加時アニメーション */
   @keyframes addPulse {
     0% { transform: scale(1); }
-    50% { transform: scale(1.05); background: linear-gradient(135deg, #43a047, #66bb6a); }
+    50% { transform: scale(1.05); background: linear-gradient(135deg, #8a9a5b, #a8b56a); }
     100% { transform: scale(1); }
   }
   .add-btn.flash {
@@ -329,14 +388,27 @@
      本日の売上表示
      ============================================ */
   .today-summary {
-    background: linear-gradient(135deg, #2e7d32 0%, #43a047 100%);
-    color: #fff;
-    border-radius: 12px;
-    padding: 16px;
+    background: linear-gradient(135deg, #6d7a3e 0%, #8a9a5b 100%);
+    color: #faf6ed;
+    border-radius: 14px;
+    padding: 18px;
     margin-bottom: 12px;
     text-align: center;
-    box-shadow: 0 4px 12px rgba(46,125,50,0.3);
+    box-shadow: 0 4px 14px rgba(109, 122, 62, 0.25);
+    position: relative;
+    border: 2px solid #d4a93b;
   }
+  .today-summary::before,
+  .today-summary::after {
+    content: "❦";
+    color: #d4a93b;
+    font-size: 14px;
+    position: absolute;
+    top: 10px;
+    opacity: 0.85;
+  }
+  .today-summary::before { left: 14px; }
+  .today-summary::after { right: 14px; }
   .today-summary .label {
     font-size: 13px;
     opacity: 0.9;
@@ -374,7 +446,7 @@
     justify-content: space-between;
     align-items: center;
     gap: 8px;
-    border-left: 4px solid #43a047;
+    border-left: 4px solid #8a9a5b;
     animation: slideIn 0.25s;
   }
   @keyframes slideIn {
@@ -408,7 +480,7 @@
   }
   .sale-item .sale-amount {
     font-weight: 700;
-    color: #2e7d32;
+    color: #6d7a3e;
     font-size: 15px;
     text-align: right;
     white-space: nowrap;
@@ -482,9 +554,9 @@
     transition: all 0.15s;
   }
   .subtab-btn.active {
-    background: #2e7d32;
+    background: #6d7a3e;
     color: #fff;
-    border-color: #2e7d32;
+    border-color: #6d7a3e;
   }
   .subtab-btn:active {
     transform: scale(0.95);
@@ -501,9 +573,9 @@
     background: #fafafa;
     border-radius: 10px;
     margin-bottom: 6px;
-    border-left: 4px solid #fb8c00;
+    border-left: 4px solid #c89933;
   }
-  .stat-row.rank-1 { border-left-color: #ffd700; }
+  .stat-row.rank-1 { border-left-color: #d4a93b; }
   .stat-row.rank-2 { border-left-color: #c0c0c0; }
   .stat-row.rank-3 { border-left-color: #cd7f32; }
   .stat-row .stat-label {
@@ -522,7 +594,7 @@
   }
   .stat-row .stat-amount {
     font-weight: 700;
-    color: #2e7d32;
+    color: #6d7a3e;
     font-size: 15px;
   }
   .stat-row .stat-count {
@@ -530,7 +602,7 @@
     color: #888;
   }
   .stat-total {
-    background: linear-gradient(135deg, #2e7d32, #43a047);
+    background: linear-gradient(135deg, #6d7a3e, #8a9a5b);
     color: #fff;
     border-radius: 10px;
     padding: 12px 14px;
@@ -600,9 +672,9 @@
   .add-row-btn {
     width: 100%;
     padding: 12px;
-    background: #e8f5e9;
-    color: #2e7d32;
-    border: 2px dashed #66bb6a;
+    background: #f0ecd8;
+    color: #6d7a3e;
+    border: 2px dashed #a8b56a;
     border-radius: 10px;
     font-size: 14px;
     font-weight: 700;
@@ -610,7 +682,7 @@
     transition: all 0.15s;
   }
   .add-row-btn:active {
-    background: #c8e6c9;
+    background: #d8dcae;
     transform: scale(0.98);
   }
   .danger-btn {
@@ -684,7 +756,7 @@
   .modal h3 {
     font-size: 16px;
     margin-bottom: 12px;
-    color: #2e7d32;
+    color: #6d7a3e;
   }
   .modal .field {
     margin-bottom: 10px;
@@ -706,7 +778,7 @@
   }
   .modal input:focus, .modal select:focus {
     outline: none;
-    border-color: #43a047;
+    border-color: #8a9a5b;
   }
   .modal-actions {
     display: flex;
@@ -726,7 +798,7 @@
     color: #555;
   }
   .modal-actions .ok {
-    background: linear-gradient(135deg, #43a047, #66bb6a);
+    background: linear-gradient(135deg, #8a9a5b, #a8b56a);
     color: #fff;
   }
   .modal-actions .danger {
@@ -766,9 +838,9 @@
   .csv-btn {
     width: 100%;
     padding: 12px;
-    background: #fff3e0;
-    color: #e65100;
-    border: 2px solid #ffb74d;
+    background: #faf2dd;
+    color: #8b6a2b;
+    border: 2px solid #d4a93b;
     border-radius: 10px;
     font-size: 14px;
     font-weight: 700;
@@ -776,7 +848,7 @@
     transition: all 0.15s;
   }
   .csv-btn:active {
-    background: #e65100;
+    background: #8b6a2b;
     color: #fff;
   }
 
@@ -830,7 +902,7 @@
     border-radius: 50%;
   }
   input:checked + .slider {
-    background-color: #43a047;
+    background-color: #8a9a5b;
   }
   input:checked + .slider:before {
     transform: translateX(20px);
@@ -904,9 +976,176 @@
   }
   .loader .spinner-big {
     width: 32px; height: 32px;
-    border: 4px solid #e0e0e0; border-top-color: #43a047;
+    border: 4px solid #e0e0e0; border-top-color: #8a9a5b;
     border-radius: 50%; animation: spin 1s linear infinite;
     margin: 0 auto 8px;
+  }
+
+  /* ============================================
+     商品リスト（数量入力一体型）
+     ============================================ */
+  .product-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 14px;
+    background: #fffdf6;
+    border: 1.5px solid #ece4cc;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    transition: all 0.2s;
+    gap: 10px;
+  }
+  .product-row.has-qty {
+    background: #f9f1d4;
+    border-color: #c89933;
+    border-width: 2px;
+    box-shadow: 0 3px 10px rgba(184, 140, 42, 0.2);
+  }
+  .product-row .info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .product-row .size-line {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .product-row .size {
+    font-size: 22px;
+    font-weight: 700;
+    color: #8b6a2b;
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+    line-height: 1;
+  }
+  .product-row .price {
+    font-size: 14px;
+    color: #6d7a3e;
+    font-weight: 700;
+  }
+  .product-row .subtotal {
+    font-size: 12px;
+    color: #6d7a3e;
+    font-weight: 700;
+    background: #f0ecd8;
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-block;
+    align-self: flex-start;
+    margin-top: 2px;
+  }
+  .product-row .qty-mini {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .qty-btn-mini {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #8a9a5b;
+    color: #faf6ed;
+    font-size: 24px;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(109, 122, 62, 0.25);
+    transition: all 0.15s;
+    border: 1px solid #6d7a3e;
+  }
+  .qty-btn-mini:active {
+    transform: scale(0.92);
+    background: #6d7a3e;
+  }
+  .qty-input-mini {
+    width: 56px;
+    height: 44px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: 700;
+    border: 2px solid #c8cfa1;
+    border-radius: 10px;
+    color: #4a4530;
+    background: #fffdf6;
+  }
+  .product-row.has-qty .qty-input-mini {
+    border-color: #c89933;
+    background: #fffdf6;
+  }
+
+  /* ============================================
+     登録サマリバー（合計＋ボタン）
+     ============================================ */
+  .register-summary {
+    background: #fff;
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .reg-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 6px;
+  }
+  .reg-label {
+    font-size: 12px;
+    color: #777;
+    font-weight: 700;
+  }
+  .reg-detail {
+    font-size: 18px;
+    font-weight: 700;
+    color: #6d7a3e;
+  }
+  .reg-detail span {
+    color: #6d7a3e;
+  }
+
+  /* ============================================
+     業者向け・自由入力ボタン
+     ============================================ */
+  .free-entry-btn {
+    width: 100%;
+    padding: 14px;
+    background: #fffdf6;
+    color: #6d7a3e;
+    border: 2px dashed #a8b56a;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    transition: all 0.15s;
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+    letter-spacing: 1.5px;
+  }
+  .free-entry-btn:active {
+    background: #f0ecd8;
+    transform: scale(0.98);
+  }
+  /* 自由入力モーダルの計算プレビュー */
+  .calc-preview {
+    background: #f9f1d4;
+    border: 1px solid #ecd9a5;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: #6d7a3e;
+    margin-bottom: 10px;
+    text-align: center;
+    font-weight: 700;
+  }
+  .calc-preview .calc-amount {
+    color: #b88c2a;
+    font-size: 16px;
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
   }
 </style>
 </head>
@@ -916,7 +1155,10 @@
      ヘッダー
      ============================================ -->
 <header class="header">
-  <h1>🍐 梨農家 売上管理</h1>
+  <div class="header-inner">
+    <img src="icon.jpg" alt="モトマルノーサン" class="header-logo" onerror="this.style.display='none'">
+    <h1>モトマルノーサン 梨園</h1>
+  </div>
   <div class="subtitle" id="todayDateLabel">本日の売上を入力</div>
 </header>
 
@@ -940,24 +1182,28 @@
       <div class="variety-grid" id="varietyGrid"></div>
     </div>
 
-    <!-- 商品選択 -->
+    <!-- 商品選択（数量入力一体型） -->
     <div class="card">
-      <div class="card-title">📦 商品を選ぶ</div>
+      <div class="card-title">📦 商品ごとに数量を入力</div>
       <div id="productList"></div>
     </div>
 
-    <!-- 個数 -->
-    <div class="card">
-      <div class="card-title">🔢 個数</div>
-      <div class="qty-row">
-        <button class="qty-btn" id="qtyMinus">−</button>
-        <input type="number" class="qty-input" id="qtyInput" value="1" min="1" inputmode="numeric">
-        <button class="qty-btn" id="qtyPlus">＋</button>
+    <!-- 登録合計バー -->
+    <div class="register-summary" id="registerSummary">
+      <div class="reg-info">
+        <div class="reg-label">登録予定</div>
+        <div class="reg-detail">
+          <span id="registerCount">0</span>点 ／
+          <span id="registerTotal">0</span>円
+        </div>
       </div>
+      <button class="add-btn" id="addBtn" disabled>📝 まとめて登録</button>
     </div>
 
-    <!-- 追加ボタン -->
-    <button class="add-btn" id="addBtn" disabled>＋ 売上に追加</button>
+    <!-- 業者向け・自由入力 -->
+    <button class="free-entry-btn" id="freeEntryBtn">
+      📋 業者向け・自由入力で登録
+    </button>
 
     <!-- 売上一覧 -->
     <div class="card" style="margin-top:14px;">
@@ -1156,7 +1402,7 @@ if (!products) {
 let sales = Store.load(LS_SALES, []);
 
 let selectedVarietyId = null;
-let selectedProductId = null;
+let productQuantities = {};   // {productId: 数量} ← 複数商品の数量をまとめて管理
 let currentTab = 'input';
 let statsMode = 'today';
 
@@ -1342,7 +1588,7 @@ function renderVarieties() {
 }
 
 /* ----------------------------------------------------------
-   売上入力 - 商品ボタン描画（カテゴリごと）
+   売上入力 - 商品リスト描画（各商品に数量入力欄つき）
    ---------------------------------------------------------- */
 function renderProducts() {
   const wrap = document.getElementById('productList');
@@ -1367,117 +1613,294 @@ function renderProducts() {
   wrap.innerHTML = order.map(key => {
     const g = groups[key];
     const useClass = g.use === '家庭' ? 'use-home' : '';
-    const itemsHtml = g.items.map(p => `
-      <button class="product-btn ${p.id === selectedProductId ? 'selected' : ''}" data-pid="${p.id}">
-        <span class="size">${escapeHtml(p.size)}</span>
-        <span class="price">${fmtYen(p.price)}円</span>
-      </button>
-    `).join('');
+    const itemsHtml = g.items.map(p => {
+      const qty = productQuantities[p.id] || 0;
+      const subtotal = qty * p.price;
+      return `
+        <div class="product-row ${qty > 0 ? 'has-qty' : ''}" data-pid="${p.id}">
+          <div class="info">
+            <div class="size-line">
+              <span class="size">${escapeHtml(p.size)}</span>
+              <span class="price">${fmtYen(p.price)}円</span>
+            </div>
+            ${qty > 0 ? `<div class="subtotal">小計 ${fmtYen(subtotal)}円</div>` : ''}
+          </div>
+          <div class="qty-mini">
+            <button class="qty-btn-mini minus" data-pid="${p.id}" aria-label="減らす">−</button>
+            <input type="number" class="qty-input-mini" data-pid="${p.id}" value="${qty}" min="0" max="9999" inputmode="numeric">
+            <button class="qty-btn-mini plus" data-pid="${p.id}" aria-label="増やす">＋</button>
+          </div>
+        </div>
+      `;
+    }).join('');
     return `
       <div class="category-section">
         <div class="category-label">
           <span>${escapeHtml(g.category)}</span>
           <span class="badge ${useClass}">${escapeHtml(g.use)}用</span>
         </div>
-        <div class="product-grid">${itemsHtml}</div>
+        ${itemsHtml}
       </div>
     `;
   }).join('');
 
-  wrap.querySelectorAll('.product-btn').forEach(btn => {
+  // 「−」ボタン
+  wrap.querySelectorAll('.qty-btn-mini.minus').forEach(btn => {
     btn.addEventListener('click', () => {
-      selectedProductId = btn.dataset.pid;
+      const pid = btn.dataset.pid;
+      const cur = productQuantities[pid] || 0;
+      const next = Math.max(0, cur - 1);
+      if (next === 0) delete productQuantities[pid];
+      else productQuantities[pid] = next;
       renderProducts();
-      updateAddBtnState();
+      updateRegisterUI();
+    });
+  });
+  // 「＋」ボタン
+  wrap.querySelectorAll('.qty-btn-mini.plus').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const pid = btn.dataset.pid;
+      productQuantities[pid] = (productQuantities[pid] || 0) + 1;
+      renderProducts();
+      updateRegisterUI();
+    });
+  });
+  // 直接入力
+  wrap.querySelectorAll('.qty-input-mini').forEach(input => {
+    input.addEventListener('input', () => {
+      const pid = input.dataset.pid;
+      let v = parseInt(input.value, 10);
+      if (isNaN(v) || v < 0) v = 0;
+      if (v > 9999) v = 9999;
+      if (v === 0) delete productQuantities[pid];
+      else productQuantities[pid] = v;
+      // 行の見た目だけ更新（再描画はblur時に）
+      const row = input.closest('.product-row');
+      if (row) row.classList.toggle('has-qty', v > 0);
+      updateRegisterUI();
+    });
+    input.addEventListener('blur', () => {
+      // 小計表示を反映
+      renderProducts();
     });
   });
 }
 
 /* ----------------------------------------------------------
-   売上入力 - 個数入力
+   売上入力 - 登録UIの状態更新（合計表示＋ボタンの活性／非活性）
    ---------------------------------------------------------- */
-const qtyInput = document.getElementById('qtyInput');
-document.getElementById('qtyMinus').addEventListener('click', () => {
-  const v = Math.max(1, (parseInt(qtyInput.value, 10) || 1) - 1);
-  qtyInput.value = v;
-});
-document.getElementById('qtyPlus').addEventListener('click', () => {
-  const v = (parseInt(qtyInput.value, 10) || 1) + 1;
-  qtyInput.value = v;
-});
-qtyInput.addEventListener('input', () => {
-  let v = parseInt(qtyInput.value, 10);
-  if (isNaN(v) || v < 1) v = 1;
-  if (v > 9999) v = 9999;
-  qtyInput.value = v;
-});
+function updateRegisterUI() {
+  let count = 0;
+  let total = 0;
+  Object.keys(productQuantities).forEach(pid => {
+    const qty = productQuantities[pid] || 0;
+    if (qty > 0) {
+      const p = getProduct(pid);
+      if (p) {
+        count += qty;
+        total += qty * p.price;
+      }
+    }
+  });
+  document.getElementById('registerCount').textContent = count;
+  document.getElementById('registerTotal').textContent = fmtYen(total);
+  // 品種選択 かつ 1点以上の数量があるときのみ登録可
+  document.getElementById('addBtn').disabled = !(selectedVarietyId && count > 0);
+}
 
-/* ----------------------------------------------------------
-   売上入力 - 追加ボタン状態
-   ---------------------------------------------------------- */
+// 互換のため：他の場所から呼ばれている updateAddBtnState を残す
 function updateAddBtnState() {
-  const btn = document.getElementById('addBtn');
-  btn.disabled = !(selectedVarietyId && selectedProductId);
+  updateRegisterUI();
 }
 
 /* ----------------------------------------------------------
-   売上入力 - 追加処理
+   売上入力 - 複数商品をまとめて登録
    ---------------------------------------------------------- */
 document.getElementById('addBtn').addEventListener('click', () => {
-  if (!selectedVarietyId || !selectedProductId) return;
+  if (!selectedVarietyId) {
+    showToast('品種を選んでください');
+    return;
+  }
   const variety = getVariety(selectedVarietyId);
-  const product = getProduct(selectedProductId);
-  const qty = Math.max(1, parseInt(qtyInput.value, 10) || 1);
 
-  // 売上データ：仕様の項目を必ず含める
-  const sale = {
-    id:           uid('s'),
-    date:         todayStr(),                                 // YYYY-MM-DD
-    time:         nowTimeStr(),                               // HH:MM
-    varietyId:    variety.id,
-    variety:      variety.name,                               // 品種
-    productId:    product.id,
-    productName:  `${product.category} ${product.size}`,      // 商品（表示名）
-    category:     product.category,                           // カテゴリ
-    use:          product.use,                                // 用途
-    size:         product.size,                               // サイズ
-    price:        product.price,                              // 単価
-    qty:          qty,                                         // 個数
-    amount:       product.price * qty,                         // 金額
-  };
-
-  // ▼▼▼ Google Apps Script（Googleスプレッドシート）に送信 ▼▼▼
-  // mode:"no-cors" のため応答は読めないが、送信自体は実行される。
-  // 通信失敗してもこの後のLocalStorage保存は必ず実行される。
-  fetch(GAS_URL, {
-    method: "POST",
-    mode: "no-cors",
-    body: JSON.stringify(sale),
-    headers: {
-      "Content-Type": "application/json"
+  // 数量0より大きい商品を集める
+  const entries = [];
+  Object.keys(productQuantities).forEach(pid => {
+    const qty = productQuantities[pid] || 0;
+    if (qty > 0) {
+      const product = getProduct(pid);
+      if (product) entries.push({ product: product, qty: qty });
     }
+  });
+
+  if (entries.length === 0) {
+    showToast('数量を入力してください');
+    return;
+  }
+
+  // 同じ日付・時刻でまとめて売上データを作成
+  const date = todayStr();
+  const time = nowTimeStr();
+  const newSales = entries.map(function(e) {
+    const product = e.product;
+    const qty = e.qty;
+    return {
+      id:           uid('s'),
+      date:         date,                                     // YYYY-MM-DD
+      time:         time,                                     // HH:MM
+      varietyId:    variety.id,
+      variety:      variety.name,                             // 品種
+      productId:    product.id,
+      productName:  `${product.category} ${product.size}`,    // 商品（表示名）
+      category:     product.category,                         // カテゴリ
+      use:          product.use,                              // 用途
+      size:         product.size,                             // サイズ
+      price:        product.price,                            // 単価
+      qty:          qty,                                      // 個数
+      amount:       product.price * qty                       // 金額
+    };
+  });
+
+  // ▼▼▼ Google Apps Script に各売上を送信（GAS側はそのままで、1件ずつPOST）▼▼▼
+  newSales.forEach(function(sale) {
+    fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify(sale),
+      headers: { "Content-Type": "application/json" }
+    });
   });
   // ▲▲▲ ここまでGAS送信 ▲▲▲
 
-  // ▼▼▼ LocalStorageへ保存（残す） ▼▼▼
-  sales.push(sale);
+  // ▼▼▼ LocalStorageへ保存（必ず実行・通信失敗しても残る）▼▼▼
+  newSales.forEach(function(sale) { sales.push(sale); });
   Store.save(LS_SALES, sales);
 
-  // 追加時アニメーション
+  // 集計用の合計
+  const totalAmount = newSales.reduce(function(s, x) { return s + x.amount; }, 0);
+  const totalQty    = newSales.reduce(function(s, x) { return s + x.qty;    }, 0);
+
+  // 登録ボタンのフラッシュアニメーション
   const btn = document.getElementById('addBtn');
   btn.classList.remove('flash');
   void btn.offsetWidth;
   btn.classList.add('flash');
 
+  showToast(`✅ ${newSales.length}商品 / ${totalQty}点 / ${fmtYen(totalAmount)}円 を登録`);
+
   // 入力リセット
   selectedVarietyId = null;
-  selectedProductId = null;
-  qtyInput.value = 1;
+  productQuantities = {};
   renderVarieties();
   renderProducts();
-  updateAddBtnState();
+  updateRegisterUI();
   renderTodaySales();
 });
+
+/* ----------------------------------------------------------
+   業者向け・自由入力ダイアログ
+   ---------------------------------------------------------- */
+function openFreeEntryDialog() {
+  // 品種の選択肢（既存品種＋「混合・その他」）
+  const visibleVars = varieties.filter(v => v.visible !== false);
+  const varietyOpts = visibleVars.map(v => `<option value="${v.id}">${escapeHtml(v.name)}</option>`).join('');
+
+  showModal(`
+    <h3>📋 業者向け・自由入力</h3>
+    <div class="field">
+      <label>品種</label>
+      <select name="fe_variety">
+        ${varietyOpts}
+        <option value="__MIXED__">混合・その他</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>商品名・内容（自由入力）</label>
+      <input type="text" name="fe_name" placeholder="例：業者卸し / 訳ありB品 / 直販詰合せ">
+    </div>
+    <div class="field">
+      <label>重さ・サイズ（任意）</label>
+      <input type="text" name="fe_size" placeholder="例：50kg / コンテナ1ケース">
+    </div>
+    <div class="field">
+      <label>数量（個・箱・ケースなど）</label>
+      <input type="number" name="fe_qty" inputmode="decimal" value="1" min="1">
+    </div>
+    <div class="field">
+      <label>合計金額（円）</label>
+      <input type="number" name="fe_amount" inputmode="decimal" placeholder="例：30000">
+    </div>
+    <div class="calc-preview" id="fe_calc">
+      合計：<span class="calc-amount" id="fe_calc_amount">0 円</span>
+      （単価：<span id="fe_calc_unit">0</span>円／個）
+    </div>
+    <div class="modal-actions">
+      <button class="cancel" id="fe_cancel">キャンセル</button>
+      <button class="ok" id="fe_ok">登録</button>
+    </div>
+  `);
+
+  // 入力に応じて単価を自動計算
+  function updateCalc() {
+    const qty = Math.max(1, Number(modalContent.querySelector('[name=fe_qty]').value) || 1);
+    const amt = Math.max(0, Number(modalContent.querySelector('[name=fe_amount]').value) || 0);
+    document.getElementById('fe_calc_amount').textContent = fmtYen(amt) + ' 円';
+    document.getElementById('fe_calc_unit').textContent = fmtYen(qty > 0 ? Math.round(amt / qty) : 0);
+  }
+  modalContent.querySelector('[name=fe_qty]').addEventListener('input', updateCalc);
+  modalContent.querySelector('[name=fe_amount]').addEventListener('input', updateCalc);
+
+  document.getElementById('fe_cancel').onclick = () => closeModal();
+  document.getElementById('fe_ok').onclick = () => {
+    const varSel  = modalContent.querySelector('[name=fe_variety]').value;
+    const name    = modalContent.querySelector('[name=fe_name]').value.trim();
+    const size    = modalContent.querySelector('[name=fe_size]').value.trim();
+    const qty     = Math.max(1, Number(modalContent.querySelector('[name=fe_qty]').value) || 1);
+    const amount  = Math.max(0, Number(modalContent.querySelector('[name=fe_amount]').value) || 0);
+
+    if (!name) { showToast('商品名・内容を入力してください'); return; }
+    if (amount <= 0) { showToast('金額を入力してください'); return; }
+
+    let varietyName = '混合', varietyId = '';
+    if (varSel && varSel !== '__MIXED__') {
+      const v = getVariety(varSel);
+      if (v) { varietyName = v.name; varietyId = v.id; }
+    }
+
+    const sale = {
+      id:           uid('s'),
+      date:         todayStr(),
+      time:         nowTimeStr(),
+      varietyId:    varietyId,
+      variety:      varietyName,
+      productId:    '',
+      productName:  name,
+      category:     '業者・自由入力',
+      use:          '業者',
+      size:         size || '-',
+      price:        qty > 0 ? Math.round(amount / qty) : amount,
+      qty:          qty,
+      amount:       amount
+    };
+
+    // GAS送信
+    fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify(sale),
+      headers: { "Content-Type": "application/json" }
+    });
+
+    // LocalStorage保存
+    sales.push(sale);
+    Store.save(LS_SALES, sales);
+
+    closeModal();
+    showToast(`✅ ${name} ${fmtYen(amount)}円 を登録しました`);
+    renderTodaySales();
+  };
+}
+document.getElementById('freeEntryBtn').addEventListener('click', openFreeEntryDialog);
 
 /* ----------------------------------------------------------
    売上入力 - 本日売上表示
