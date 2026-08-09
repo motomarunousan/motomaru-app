@@ -1110,6 +1110,86 @@
   }
 
   /* ============================================
+     日付選択カード（前日入力用）
+     ============================================ */
+  .date-picker-card {
+    background: #fffdf6;
+    border: 2px solid #d8dcae;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    transition: all 0.2s;
+  }
+  .date-picker-card.not-today {
+    background: #fff3e0;
+    border-color: #d4a93b;
+    border-width: 3px;
+    box-shadow: 0 3px 10px rgba(212, 169, 59, 0.25);
+  }
+  .date-picker-label {
+    font-size: 13px;
+    color: #6d7a3e;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
+  }
+  .date-picker-card.not-today .date-picker-label {
+    color: #b88c2a;
+  }
+  .date-picker-input {
+    padding: 8px 10px;
+    border: 2px solid #c8cfa1;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #4a4530;
+    background: #fff;
+    font-family: inherit;
+    flex: 1;
+    min-width: 140px;
+  }
+  .date-picker-input:focus {
+    outline: none;
+    border-color: #8a9a5b;
+  }
+  .date-today-btn {
+    padding: 8px 14px;
+    background: #8a9a5b;
+    color: #faf6ed;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .date-today-btn:active {
+    transform: scale(0.95);
+    background: #6d7a3e;
+  }
+  .date-today-btn:disabled {
+    background: #d8dcae;
+    color: #8a9a5b;
+    cursor: default;
+  }
+  .date-warning-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #d4a93b;
+    color: #fff;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 6px;
+  }
+
+  /* ============================================
      業者向け・自由入力ボタン
      ============================================ */
   .free-entry-btn {
@@ -1171,9 +1251,18 @@
 
     <!-- 本日の売上サマリ -->
     <div class="today-summary">
-      <div class="label">本日の売上合計</div>
+      <div class="label" id="summaryLabel">本日の売上合計</div>
       <div class="total"><span id="todayTotal">0</span><span class="yen">円</span></div>
       <div class="count">販売点数: <span id="todayCount">0</span> 点</div>
+    </div>
+
+    <!-- 日付選択（前日入力用） -->
+    <div class="date-picker-card" id="datePickerCard">
+      <div class="date-picker-label">
+        📅 <span id="datePickerLabelText">登録する日付</span>
+      </div>
+      <input type="date" class="date-picker-input" id="datePickerInput">
+      <button class="date-today-btn" id="dateTodayBtn" disabled>今日に戻す</button>
     </div>
 
     <!-- 品種選択 -->
@@ -1207,7 +1296,7 @@
 
     <!-- 売上一覧 -->
     <div class="card" style="margin-top:14px;">
-      <div class="card-title">📋 本日の売上一覧</div>
+      <div class="card-title" id="todayListTitle">📋 本日の売上一覧</div>
       <ul class="sale-list" id="saleList"></ul>
       <button class="reset-btn" id="resetTodayBtn">🔄 本日の売上をリセット</button>
     </div>
@@ -1410,6 +1499,7 @@ let selectedVarietyId = null;
 let productQuantities = {};   // {productId: 数量} ← 複数商品の数量をまとめて管理
 let currentTab = 'input';
 let statsMode = 'today';
+let selectedDate = null;      // 登録に使う日付（YYYY-MM-DD）。初期化時にtodayStr()で設定
 
 // 集計タブ用：スプレッドシートから取得したデータ
 let remoteSales = [];
@@ -1692,6 +1782,70 @@ function renderProducts() {
 }
 
 /* ----------------------------------------------------------
+   日付選択（前日入力対応）
+   ---------------------------------------------------------- */
+function fmtDateJP(dateStr) {
+  // "2026-08-03" -> "8月3日（月）"
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  if (isNaN(d)) return dateStr;
+  const days = ['日','月','火','水','木','金','土'];
+  return (d.getMonth()+1) + '月' + d.getDate() + '日（' + days[d.getDay()] + '）';
+}
+
+function updateDatePickerUI() {
+  const today = todayStr();
+  const input = document.getElementById('datePickerInput');
+  const card = document.getElementById('datePickerCard');
+  const btn = document.getElementById('dateTodayBtn');
+  const labelText = document.getElementById('datePickerLabelText');
+  const summaryLabel = document.getElementById('summaryLabel');
+
+  if (input.value !== selectedDate) input.value = selectedDate;
+
+  if (selectedDate === today) {
+    card.classList.remove('not-today');
+    labelText.textContent = '登録する日付';
+    btn.disabled = true;
+    summaryLabel.textContent = '本日の売上合計';
+  } else {
+    card.classList.add('not-today');
+    labelText.innerHTML = '⚠️ ' + escapeHtml(fmtDateJP(selectedDate)) + ' に登録します';
+    btn.disabled = false;
+    summaryLabel.textContent = fmtDateJP(selectedDate) + ' の売上合計';
+  }
+
+  // 「本日の売上一覧」の見出しも更新
+  const listCardTitle = document.getElementById('todayListTitle');
+  if (listCardTitle) {
+    listCardTitle.textContent = (selectedDate === today)
+      ? '📋 本日の売上一覧'
+      : '📋 ' + fmtDateJP(selectedDate) + ' の売上一覧';
+  }
+  // リセットボタンのラベルも更新
+  const resetBtn = document.getElementById('resetTodayBtn');
+  if (resetBtn) {
+    resetBtn.textContent = (selectedDate === today)
+      ? '🔄 本日の売上をリセット'
+      : '🔄 ' + fmtDateJP(selectedDate) + ' の売上をリセット';
+  }
+
+  // ヘッダー日付ラベル
+  document.getElementById('todayDateLabel').textContent =
+    selectedDate + (selectedDate === today ? '（本日）' : '（登録先の日付）');
+}
+
+// 日付を変更した時
+function onDateChange() {
+  const input = document.getElementById('datePickerInput');
+  const v = input.value;
+  if (!v) { input.value = selectedDate; return; }
+  selectedDate = v;
+  updateDatePickerUI();
+  renderTodaySales();  // 選択日の売上一覧に切り替え
+}
+
+/* ----------------------------------------------------------
    売上入力 - 登録UIの状態更新（合計表示＋ボタンの活性／非活性）
    ---------------------------------------------------------- */
 function updateRegisterUI() {
@@ -1744,7 +1898,7 @@ document.getElementById('addBtn').addEventListener('click', () => {
   }
 
   // 同じ日付・時刻でまとめて売上データを作成
-  const date = todayStr();
+  const date = selectedDate || todayStr();   // ← 日付選択で選ばれた日付を使う
   const time = nowTimeStr();
   const newSales = entries.map(function(e) {
     const product = e.product;
@@ -1874,7 +2028,7 @@ function openFreeEntryDialog() {
 
     const sale = {
       id:           uid('s'),
-      date:         todayStr(),
+      date:         selectedDate || todayStr(),   // ← 日付選択で選ばれた日付を使う
       time:         nowTimeStr(),
       varietyId:    varietyId,
       variety:      varietyName,
@@ -1912,7 +2066,8 @@ document.getElementById('freeEntryBtn').addEventListener('click', openFreeEntryD
    ---------------------------------------------------------- */
 function renderTodaySales() {
   const today = todayStr();
-  const todays = sales.filter(s => s.date === today)
+  const targetDate = selectedDate || today;
+  const todays = sales.filter(s => s.date === targetDate)
                       .sort((a, b) => (b.time || '').localeCompare(a.time || ''));
   const total = todays.reduce((s, x) => s + x.amount, 0);
   const count = todays.reduce((s, x) => s + x.qty, 0);
@@ -1921,7 +2076,8 @@ function renderTodaySales() {
   document.getElementById('todayCount').textContent = fmtYen(count);
 
   // ヘッダー日付ラベル
-  document.getElementById('todayDateLabel').textContent = `${today}（本日）`;
+  document.getElementById('todayDateLabel').textContent =
+    targetDate + (targetDate === today ? '（本日）' : '（登録先の日付）');
 
   const list = document.getElementById('saleList');
   if (todays.length === 0) {
@@ -1972,19 +2128,22 @@ function renderTodaySales() {
    ---------------------------------------------------------- */
 document.getElementById('resetTodayBtn').addEventListener('click', async () => {
   const today = todayStr();
-  const todays = sales.filter(s => s.date === today);
+  const targetDate = selectedDate || today;
+  const isToday = (targetDate === today);
+  const dateLabel = isToday ? `本日（${today}）` : fmtDateJP(targetDate);
+  const todays = sales.filter(s => s.date === targetDate);
   if (todays.length === 0) {
-    showToast('本日の売上はありません');
+    showToast(isToday ? '本日の売上はありません' : dateLabel + 'の売上はありません');
     return;
   }
-  const ok = await confirmDialog('本日の売上をリセット',
-    `本日（${today}）の売上 ${todays.length} 件を削除します。\nよろしいですか？`,
+  const ok = await confirmDialog(`${dateLabel} の売上をリセット`,
+    `${dateLabel} の売上 ${todays.length} 件を削除します。\nよろしいですか？`,
     { danger: true, okLabel: 'リセット' });
   if (!ok) return;
-  sales = sales.filter(s => s.date !== today);
+  sales = sales.filter(s => s.date !== targetDate);
   Store.save(LS_SALES, sales);
   renderTodaySales();
-  showToast('本日の売上をリセットしました');
+  showToast(dateLabel + 'の売上をリセットしました');
 });
 
 /* ============================================================
@@ -2406,6 +2565,19 @@ document.getElementById('csvBtn').addEventListener('click', () => {
    初期化
    ============================================================ */
 function init() {
+  // 日付選択の初期化（今日）
+  selectedDate = todayStr();
+  const dateInput = document.getElementById('datePickerInput');
+  dateInput.value = selectedDate;
+  dateInput.max = todayStr();  // 未来の日付は選べないようにする
+  dateInput.addEventListener('change', onDateChange);
+  document.getElementById('dateTodayBtn').addEventListener('click', () => {
+    selectedDate = todayStr();
+    updateDatePickerUI();
+    renderTodaySales();
+  });
+  updateDatePickerUI();
+
   renderVarieties();
   renderProducts();
   renderTodaySales();
