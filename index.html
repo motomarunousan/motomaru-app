@@ -519,6 +519,16 @@
     background: #8a9a5b;
     transform: scale(0.9);
   }
+  .entry-badge {
+    display: inline-block;
+    background: #d4a93b;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 8px;
+    margin-left: 4px;
+  }
 
   /* ============================================
      リセットボタン
@@ -1539,6 +1549,28 @@ function nowTimeStr() {
   const m = String(d.getMinutes()).padStart(2,'0');
   return `${h}:${m}`;
 }
+// 実際に入力した日時（例：2026-08-11 22:30）
+function nowStampStr() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const mo = String(d.getMonth()+1).padStart(2,'0');
+  const da = String(d.getDate()).padStart(2,'0');
+  const h = String(d.getHours()).padStart(2,'0');
+  const mi = String(d.getMinutes()).padStart(2,'0');
+  return `${y}-${mo}-${da} ${h}:${mi}`;
+}
+// 売上日と今日を比べて「当日入力」「◯日前の分」を返す
+function entryTypeLabel(saleDate) {
+  const today = todayStr();
+  if (!saleDate || saleDate === today) return '当日入力';
+  const d1 = new Date(saleDate + 'T00:00:00');
+  const d2 = new Date(today + 'T00:00:00');
+  if (isNaN(d1) || isNaN(d2)) return '当日入力';
+  const diff = Math.round((d2 - d1) / 86400000);
+  if (diff > 0) return diff + '日前の分';
+  if (diff < 0) return Math.abs(diff) + '日後の分';
+  return '当日入力';
+}
 function fmtYen(n) {
   return Number(n).toLocaleString('ja-JP');
 }
@@ -1930,7 +1962,9 @@ document.getElementById('addBtn').addEventListener('click', () => {
       size:         product.size,                             // サイズ
       price:        product.price,                            // 単価
       qty:          qty,                                      // 個数
-      amount:       product.price * qty                       // 金額
+      amount:       product.price * qty,                      // 金額
+      registeredAt: nowStampStr(),                            // 実際に入力した日時
+      entryType:    entryTypeLabel(date)                      // 当日入力 / ◯日前の分
     };
   });
 
@@ -2053,7 +2087,9 @@ function openFreeEntryDialog() {
       size:         size || '-',
       price:        qty > 0 ? Math.round(amount / qty) : amount,
       qty:          qty,
-      amount:       amount
+      amount:       amount,
+      registeredAt: nowStampStr(),
+      entryType:    entryTypeLabel(selectedDate || todayStr())
     };
 
     // GAS送信
@@ -2101,7 +2137,11 @@ function renderTodaySales() {
   list.innerHTML = todays.map(s => `
     <li class="sale-item" data-id="${s.id}">
       <div class="sale-info">
-        <div class="sale-time">${escapeHtml(s.date)} ${escapeHtml(s.time)}　${escapeHtml(s.variety)}</div>
+        <div class="sale-time">
+          ${escapeHtml(s.date)} ${escapeHtml(s.time)}　${escapeHtml(s.variety)}
+          ${(s.entryType && s.entryType !== '当日入力')
+            ? `<span class="entry-badge">後日入力（${escapeHtml(s.entryType)}）</span>` : ''}
+        </div>
         <div class="sale-name">${escapeHtml(s.productName)}</div>
         <div class="sale-detail">${escapeHtml(s.use)}用 / ${escapeHtml(s.size)} / ${fmtYen(s.price)}円 × ${s.qty}</div>
       </div>
@@ -2259,9 +2299,11 @@ function openEditDialog(id) {
         category:    sale.category,
         use:         sale.use,
         size:        sale.size,
-        price:       sale.price,
-        qty:         sale.qty,
-        amount:      sale.amount
+        price:        sale.price,
+        qty:          sale.qty,
+        amount:       sale.amount,
+        registeredAt: sale.registeredAt || '',
+        entryType:    sale.entryType || ''
       }),
       headers: { "Content-Type": "application/json" }
     });
