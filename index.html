@@ -505,6 +505,20 @@
     color: #fff;
     transform: scale(0.9);
   }
+  .sale-edit-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #f0ecd8;
+    font-size: 15px;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    border: 1px solid #c8cfa1;
+  }
+  .sale-edit-btn:active {
+    background: #8a9a5b;
+    transform: scale(0.9);
+  }
 
   /* ============================================
      リセットボタン
@@ -2095,15 +2109,33 @@ function renderTodaySales() {
         ${fmtYen(s.amount)}円
         <div class="sale-qty">${s.qty}点</div>
       </div>
+      <button class="sale-edit-btn" data-id="${s.id}" aria-label="編集">✏️</button>
       <button class="sale-del-btn" data-id="${s.id}" aria-label="削除">×</button>
     </li>
   `).join('');
 
+  // --- 編集ボタン ---
+  list.querySelectorAll('.sale-edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => openEditDialog(btn.dataset.id));
+  });
+
+  // --- 削除ボタン（スプレッドシートからも消す）---
   list.querySelectorAll('.sale-del-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       const id = btn.dataset.id;
-      const ok = await confirmDialog('削除しますか？', 'この売上を削除します。\n元に戻せません。', { danger: true, okLabel: '削除' });
+      const ok = await confirmDialog('削除しますか？',
+        'この売上を削除します。\nスプレッドシートからも削除されます。\n元に戻せません。',
+        { danger: true, okLabel: '削除' });
       if (!ok) return;
+
+      // スプレッドシートにも削除を通知
+      fetch(GAS_URL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify({ action: 'delete', id: id }),
+        headers: { "Content-Type": "application/json" }
+      });
+
       const li = list.querySelector(`.sale-item[data-id="${id}"]`);
       if (li) {
         li.classList.add('removing');
@@ -2121,6 +2153,123 @@ function renderTodaySales() {
       showToast('削除しました');
     });
   });
+}
+
+/* ----------------------------------------------------------
+   売上の編集ダイアログ
+   ---------------------------------------------------------- */
+function openEditDialog(id) {
+  const sale = sales.find(s => s.id === id);
+  if (!sale) { showToast('データが見つかりません'); return; }
+
+  const visibleVars = varieties.filter(v => v.visible !== false);
+  const varietyOpts = visibleVars.map(v =>
+    `<option value="${escapeHtml(v.name)}" ${v.name === sale.variety ? 'selected' : ''}>${escapeHtml(v.name)}</option>`
+  ).join('');
+  const hasCurrent = visibleVars.some(v => v.name === sale.variety);
+  const extraOpt = hasCurrent ? '' :
+    `<option value="${escapeHtml(sale.variety)}" selected>${escapeHtml(sale.variety)}</option>`;
+
+  showModal(`
+    <h3>✏️ 売上を修正</h3>
+    <div class="field">
+      <label>日付</label>
+      <input type="date" name="ed_date" value="${escapeHtml(sale.date)}">
+    </div>
+    <div class="field">
+      <label>品種</label>
+      <select name="ed_variety">${extraOpt}${varietyOpts}</select>
+    </div>
+    <div class="field">
+      <label>商品名</label>
+      <input type="text" name="ed_name" value="${escapeHtml(sale.productName)}">
+    </div>
+    <div class="field">
+      <label>単価（円）</label>
+      <input type="number" name="ed_price" inputmode="decimal" value="${sale.price}">
+    </div>
+    <div class="field">
+      <label>個数</label>
+      <input type="number" name="ed_qty" inputmode="numeric" value="${sale.qty}" min="1">
+    </div>
+    <div class="field">
+      <label>金額（円）</label>
+      <input type="number" name="ed_amount" inputmode="decimal" value="${sale.amount}">
+    </div>
+    <div class="calc-preview" id="ed_calc">
+      単価 × 個数 ＝ <span class="calc-amount" id="ed_calc_amount">0 円</span>
+    </div>
+    <div class="modal-actions">
+      <button class="cancel" id="ed_cancel">キャンセル</button>
+      <button class="ok" id="ed_ok">修正を保存</button>
+    </div>
+  `);
+
+  const $price  = modalContent.querySelector('[name=ed_price]');
+  const $qty    = modalContent.querySelector('[name=ed_qty]');
+  const $amount = modalContent.querySelector('[name=ed_amount]');
+
+  // 単価か個数を変えたら金額を自動計算
+  function recalc() {
+    const p = Number($price.value) || 0;
+    const q = Number($qty.value) || 0;
+    $amount.value = p * q;
+    document.getElementById('ed_calc_amount').textContent = fmtYen(p * q) + ' 円';
+  }
+  $price.addEventListener('input', recalc);
+  $qty.addEventListener('input', recalc);
+  $amount.addEventListener('input', () => {
+    document.getElementById('ed_calc_amount').textContent =
+      fmtYen(Number($amount.value) || 0) + ' 円（手入力）';
+  });
+  recalc();
+  $amount.value = sale.amount;  // 初期は元の金額を保持
+
+  document.getElementById('ed_cancel').onclick = () => closeModal();
+  document.getElementById('ed_ok').onclick = () => {
+    const newDate   = modalContent.querySelector('[name=ed_date]').value || sale.date;
+    const newVar    = modalContent.querySelector('[name=ed_variety]').value;
+    const newName   = modalContent.querySelector('[name=ed_name]').value.trim();
+    const newPrice  = Math.max(0, Number($price.value) || 0);
+    const newQty    = Math.max(1, Number($qty.value) || 1);
+    const newAmount = Math.max(0, Number($amount.value) || 0);
+
+    if (!newName) { showToast('商品名を入力してください'); return; }
+
+    sale.date        = newDate;
+    sale.variety     = newVar;
+    sale.productName = newName;
+    sale.price       = newPrice;
+    sale.qty         = newQty;
+    sale.amount      = newAmount;
+
+    Store.save(LS_SALES, sales);
+
+    // スプレッドシートにも修正を送信
+    fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify({
+        action:      'update',
+        id:          sale.id,
+        date:        sale.date,
+        time:        sale.time,
+        variety:     sale.variety,
+        productName: sale.productName,
+        category:    sale.category,
+        use:         sale.use,
+        size:        sale.size,
+        price:       sale.price,
+        qty:         sale.qty,
+        amount:      sale.amount
+      }),
+      headers: { "Content-Type": "application/json" }
+    });
+
+    closeModal();
+    showToast('✅ 修正しました');
+    renderTodaySales();
+  };
 }
 
 /* ----------------------------------------------------------
